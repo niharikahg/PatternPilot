@@ -1,8 +1,9 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { ArrowLeft, ArrowRight, Lightbulb, Loader2, Pause, Play } from "lucide-react";
+import { ArrowRight, Lightbulb, Loader2, Pause, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { drawWaitingQuestion } from "@/lib/waiting-questions";
 
 const QUESTIONS = [
   { prompt: "Double n in an O(n²) algorithm. How much work now?", options: ["Twice as much", "Four times as much", "The same"], answer: 1, explanation: "(2n)² = 4n². Twice the input means roughly four times the work." },
@@ -29,22 +30,32 @@ const TIPS = [
 /** Local learning bites appear immediately, without another AI request. */
 export function ThinkingScene() {
   const [i, setI] = useState(0);
+  const [ready, setReady] = useState(false);
+  const [finished, setFinished] = useState(false);
   const [paused, setPaused] = useState(false);
   const [selected, setSelected] = useState<number | null>(null);
   const reducedMotion = useReducedMotion();
-  const move = (direction: number) => {
-    if (selected === null) return;
-    setI((x) => (x + direction + TIPS.length) % TIPS.length);
+  const draw = () => {
+    let storage: Storage | undefined;
+    try { storage = window.localStorage; } catch { /* Use in-memory history. */ }
+    const next = drawWaitingQuestion(TIPS.length, storage);
+    if (next === null) setFinished(true);
+    else setI(next);
     setSelected(null);
   };
+  useEffect(() => { draw(); setReady(true); }, []);
+  const move = () => {
+    if (selected === null || finished) return;
+    draw();
+  };
   useEffect(() => {
-    if (paused || reducedMotion || selected === null) return;
-    const id = setInterval(() => { setI((x) => (x + 1) % TIPS.length); setSelected(null); }, 20000);
+    if (paused || reducedMotion || selected === null || finished) return;
+    const id = setInterval(move, 20000);
     return () => clearInterval(id);
-  }, [paused, reducedMotion, i, selected]);
+  }, [paused, reducedMotion, i, selected, finished]);
   const tip = TIPS[i];
   const question = QUESTIONS[i];
-  if (!tip || !question) return null;
+  if (!ready || !tip || !question) return null;
 
   return (
     <section aria-label="Algorithm tips while waiting" className="min-w-0 border-y py-5">
@@ -71,6 +82,7 @@ export function ThinkingScene() {
         </motion.div>
       </AnimatePresence>
       <div className="border-t py-4">
+        {finished ? <p className="text-sm font-medium">You’ve seen every question. Your breakdown is still on its way…</p> : <>
         <h4 className="mb-3 text-sm font-semibold">{question.prompt}</h4>
         <div className="grid gap-2">
           {question.options.map((option, index) => (
@@ -80,13 +92,13 @@ export function ThinkingScene() {
           ))}
         </div>
         {selected !== null && <p role="status" className="mt-3 text-sm leading-relaxed"><span className="font-semibold">{selected === question.answer ? "Exactly! " : "Not quite. "}</span>{question.explanation}</p>}
+        </>}
       </div>
       <div className="flex items-center justify-between gap-3 border-t pt-3">
         <span className="font-mono text-xs text-muted-foreground">{String(i + 1).padStart(2, "0")} / {String(TIPS.length).padStart(2, "0")}</span>
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" disabled={selected === null} aria-label="Previous tip" title="Previous tip" onClick={() => move(-1)}><ArrowLeft className="h-4 w-4" /></Button>
           {!reducedMotion && <Button variant="ghost" size="icon" aria-label={paused ? "Resume tips" : "Pause tips"} title={paused ? "Resume tips" : "Pause tips"} onClick={() => setPaused((p) => !p)}>{paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}</Button>}
-          <Button variant="ghost" size="icon" disabled={selected === null} aria-label="Next tip" title="Next tip" onClick={() => move(1)}><ArrowRight className="h-4 w-4" /></Button>
+          <Button variant="ghost" size="icon" disabled={selected === null || finished} aria-label="Next tip" title="Next tip" onClick={move}><ArrowRight className="h-4 w-4" /></Button>
         </div>
       </div>
     </section>
