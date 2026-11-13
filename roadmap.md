@@ -1,3 +1,12 @@
+# Current fixes
+- [ ] Correct guesses immediately with reasons; highlight chosen answers and keep rewards clear of navigation.
+- [ ] Carry solved reviews into saved status and defer new reviews until due.
+- [ ] Merge logging into one outcome choice; repair race bars and remove early algorithm spoilers.
+- [ ] Show early Understand prominently while custom results continue loading.
+- [ ] Add AI spot-the-bug practice and more presets.
+- [ ] Add optional public sign-in and private cross-device progress sync, without profile fields.
+- [ ] Run rule tests and verify real practice and signed-in progress flows.
+
 # Tasks
 - [x] Reorder results into Understand, Guess, Walkthrough, Code, Reveal, and Log; gate answers and move solution hotspots.
 - [x] Replace waiting technique clues with neutral thinking prompts.

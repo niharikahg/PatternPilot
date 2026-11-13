@@ -7,6 +7,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { cn } from "@/lib/utils";
 import { PATTERNS, type Breakdown } from "@/lib/types";
 import { breakdownToMarkdown } from "@/lib/markdown";
+import { patternVerdict, reviewOutcome } from "@/lib/guess-feedback";
+import type { CodeFeedback } from "@/lib/code-review.functions";
+import { BugPractice } from "./BugPractice";
 import { Visualizer } from "./Visualizer";
 import { StoryMode } from "./StoryMode";
 import { ComplexityLab } from "./ComplexityLab";
@@ -36,7 +39,7 @@ function H({ children }: { children: ReactNode }) {
   return <h4 className="mt-5 mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground first:mt-0">{children}</h4>;
 }
 
-export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave, logControls, initialStep = "understand", sessionKey = b.title, audioUrl }: { b: Breakdown; actions?: ReactNode; onIntuition?: (score: number) => void; codeAttempt?: SavedProblem["code_attempt"]; onCodeSave?: (attempt: NonNullable<SavedProblem["code_attempt"]>) => void; logControls?: ReactNode; initialStep?: string; sessionKey?: string; audioUrl?: string | undefined }) {
+export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave, logControls, initialStep = "understand", sessionKey = b.title, audioUrl, onReviewed }: { b: Breakdown; actions?: ReactNode; onIntuition?: (score: number) => void; codeAttempt?: SavedProblem["code_attempt"]; onCodeSave?: (attempt: NonNullable<SavedProblem["code_attempt"]>) => void; logControls?: ReactNode; initialStep?: string; sessionKey?: string; audioUrl?: string | undefined; onReviewed?: (feedback: CodeFeedback) => void }) {
   const [session, setSession] = useState<PracticeSession>(() => freshSession(initialStep));
   const [ready, setReady] = useState(false);
   const [burst, setBurst] = useState(false);
@@ -165,9 +168,9 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
           </TabsList>
         </div>
         <TabsContent value="understand" className="space-y-5 pt-4"><h3 className="font-display text-xl font-bold">Understand the problem</h3>{body[0]}<h3 className="font-display text-xl font-bold">Examples</h3>{body[1]}</TabsContent>
-        <TabsContent value="guess" className="space-y-5 pt-4"><h3 className="font-display text-xl font-bold">Which pattern fits?</h3><div className="grid gap-2 sm:grid-cols-2">{patternOptions.map(option=><Button key={option} variant={session.patternGuess===option?'secondary':'outline'} disabled={Boolean(session.patternGuess)} onClick={()=>prediction('pattern',option,option===b.pattern.name)}>{option}</Button>)}</div>{session.patternGuess&&<p className="text-sm">Guess recorded. Answers stay hidden until your code attempt.</p>}{b.complexity_lab&&<ComplexityLab mode="guess" lab={b.complexity_lab} code="" initialBet={session.complexityGuess as Growth | undefined} onBet={value=>prediction('complexity',value,value===b.complexity_lab?.optimized_time)} onAnswer={()=>{}} />}</TabsContent>
-        <TabsContent forceMount value="walkthrough" className="space-y-5 pt-4 data-[state=inactive]:hidden"><Visualizer viz={b.visualization} />{playbackStory&&<StoryMode story={playbackStory} onAnswer={answer} allowEnding={unlocked} audioUrl={audioUrl} />}</TabsContent>
-        <TabsContent forceMount value="code" className="pt-4 data-[state=inactive]:hidden"><CodePractice problem={`${b.title}\n${b.understand.restatement}\n${b.understand.constraints.join('; ')}`} attempt={codeAttempt} onSave={onCodeSave??(()=>{})} onSubmitted={()=>setSession(prev=>({...prev,submitted:true}))} onReviewed={result=>{ if(result.verdict==='Looks correct') {setSession(prev=>award(prev,'code',true)); setBurst(true);recordPracticeDay();} }} /><Button variant="ghost" className="mt-3" disabled={unlocked} onClick={revealEarly}><Lock className="size-4" /> I'm stuck, reveal</Button></TabsContent>
+        <TabsContent value="guess" className="space-y-5 pt-4"><h3 className="font-display text-xl font-bold">Which pattern fits?</h3><div className="grid gap-2 sm:grid-cols-2">{patternOptions.map(option=><Button key={option} variant={session.patternGuess===option?'secondary':'outline'} aria-pressed={session.patternGuess===option} className={cn('h-auto min-h-12 whitespace-normal',session.patternGuess===option&&'border-primary bg-primary-soft ring-2 ring-primary disabled:opacity-100')} disabled={Boolean(session.patternGuess)} onClick={()=>prediction('pattern',option,option===b.pattern.name)}>{session.patternGuess===option&&<Check className="size-4" />}{option}</Button>)}</div>{session.patternGuess&&<p role="status" className="text-sm">{patternVerdict(b,session.patternGuess)}</p>}{b.complexity_lab&&<ComplexityLab mode="guess" lab={b.complexity_lab} code="" initialBet={session.complexityGuess as Growth | undefined} onBet={value=>prediction('complexity',value,value===b.complexity_lab?.optimized_time)} onAnswer={()=>{}} />}</TabsContent>
+        <TabsContent forceMount value="walkthrough" className="space-y-5 pt-4 data-[state=inactive]:hidden"><Visualizer viz={b.visualization} hideTechnique={!unlocked} />{playbackStory&&<StoryMode story={playbackStory} onAnswer={answer} allowEnding={unlocked} audioUrl={audioUrl} />}</TabsContent>
+        <TabsContent forceMount value="code" className="pt-4 data-[state=inactive]:hidden"><CodePractice problem={`${b.title}\n${b.understand.restatement}\n${b.understand.constraints.join('; ')}`} attempt={codeAttempt} onSave={onCodeSave??(()=>{})} onSubmitted={()=>setSession(prev=>({...prev,submitted:true}))} onReviewed={result=>{ onReviewed?.(result); if(result.verdict==='Looks correct') {setSession(prev=>award(prev,'code',true)); setBurst(true);recordPracticeDay();} }} /><Button variant="ghost" className="mt-3" disabled={unlocked} onClick={revealEarly}><Lock className="size-4" /> I'm stuck, reveal</Button></TabsContent>
         <TabsContent value="reveal" className="space-y-5 pt-4">
         {!unlocked&&<div className="flex flex-wrap items-center gap-3"><Lock className="size-5" /><p className="text-sm">Submit your code for review to unlock the answers.</p><Button variant="outline" onClick={revealEarly}>I'm stuck, reveal</Button></div>}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -192,6 +195,7 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
           <div className="min-w-0">{opened === null ? null : body[opened]}</div>
         </DialogContent>
       </Dialog>
+      {unlocked&&<BugPractice problem={b.understand.restatement} /> }
       {unlocked&&b.complexity_lab&&<ComplexityLab mode="reveal" lab={b.complexity_lab} code={b.solution.python} onAnswer={answer} />}
       </TabsContent>
       <TabsContent value="log" className="pt-4">{logControls ?? actions}</TabsContent>
@@ -205,7 +209,7 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
       <AnimatePresence>
         {burst && (
           <motion.div key={session.attempts} initial={{ scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed bottom-5 right-5 z-50 rounded-full bg-primary px-4 py-2 font-mono text-sm font-semibold text-primary-foreground shadow-lg">
+            className="pointer-events-none fixed top-20 left-1/2 -translate-x-1/2 z-50 rounded-full bg-primary px-4 py-2 font-mono text-sm font-semibold text-primary-foreground shadow-lg">
             🔥 {session.combo}× · {session.xp} XP · intuition {intuitionScore(session.correct, session.attempts)}%
           </motion.div>
         )}

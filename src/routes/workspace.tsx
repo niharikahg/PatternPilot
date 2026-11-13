@@ -16,6 +16,8 @@ import { storyWithEnding } from "@/lib/story-ending";
 import { LIBRARY } from "@/lib/library";
 import { DIFFICULTIES, type Breakdown } from "@/lib/types";
 import { addProblem, type SavedProblem } from "@/lib/local-log";
+import { createReviewPlan } from "@/lib/review";
+import { reviewOutcome } from "@/lib/guess-feedback";
 import { ReviewTracker } from "@/components/app/ReviewTracker";
 import type { PracticeStatus, ReviewPlan } from "@/lib/review";
 import { cn } from "@/lib/utils";
@@ -99,7 +101,7 @@ function Workspace() {
   const save = useMutation({
     mutationFn: async () => {
       if (!b) return;
-      return addProblem({ title: b.title, problem_text: text, pattern: b.pattern.name, difficulty, confidence, intuition, breakdown: b, practice_status: practiceStatus, review: reviewPlan, ...(codeAttempt ? { code_attempt: codeAttempt } : {}) });
+      return addProblem({ title: b.title, problem_text: text, pattern: b.pattern.name, difficulty, confidence, intuition, breakdown: b, practice_status: practiceStatus, review: reviewPlan, last_practiced_at: new Date().toISOString(), ...(codeAttempt ? { code_attempt: codeAttempt } : {}) });
     },
     onSuccess: (id) => {
       qc.invalidateQueries({ queryKey: ["problems"] });
@@ -129,6 +131,7 @@ function Workspace() {
 
       {reviewing && <Button variant="ghost" size="sm" className="mt-4" onClick={() => { setReviewing(false); requestAnimationFrame(() => inputRef.current?.focus()); }}><ArrowLeft className="size-4" /> Change problem</Button>}
 
+      {run.isPending&&earlySections.understand&&<section className="mt-6 space-y-4 border-y py-5" aria-label="Early problem understanding"><h2 className="font-display text-xl font-bold">1. Understand</h2><p>{earlySections.understand.restatement}</p><p className="text-sm">Input: {earlySections.understand.inputs} · Output: {earlySections.understand.outputs}</p>{earlySections.examples&&<><h3 className="font-semibold">Examples</h3>{earlySections.examples.map((e,i)=><div key={i} className="border-b py-3"><p className="font-mono text-sm">{e.input} → {e.output}</p><p className="text-sm">{e.explanation}</p></div>)}</>}<p className="text-sm text-muted-foreground">Walkthrough, code practice, and answers are loading in the background…</p></section>}
       {!reviewing && <>
       <h2 className="mt-6 text-lg font-semibold">1. Choose your starting point</h2>
 
@@ -171,28 +174,21 @@ function Workspace() {
       </motion.div>
 
       {run.isPending && <ThinkingScene />}
-      {run.isPending&&earlySections.understand&&<section className="lg:col-span-2 space-y-4 border-t pt-5"><h2 className="font-display text-xl font-bold">Understand</h2><p>{earlySections.understand.restatement}</p><p className="text-sm">Input: {earlySections.understand.inputs} · Output: {earlySections.understand.outputs}</p>{earlySections.examples&&<><h3 className="font-semibold">Examples</h3>{earlySections.examples.map((e,i)=><div key={i} className="border-b py-3"><p className="font-mono text-sm">{e.input} → {e.output}</p><p className="text-sm">{e.explanation}</p></div>)}</>}<p className="text-sm text-muted-foreground">The remaining steps are being prepared…</p></section>}
       </div>
       </>}
 
       {b && reviewing && !run.isPending && (
         <motion.div ref={resultRef} tabIndex={-1} initial={{ opacity: 0, y: 40, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 80 }} className="mt-6 scroll-mt-20 space-y-6 outline-none">
           <h2 className="text-lg font-semibold">3. Explore your breakdown</h2>
-          <BreakdownView key={b.title + text} b={b} onIntuition={setIntuition} codeAttempt={codeAttempt} onCodeSave={setCodeAttempt} audioUrl={audioUrl} logControls={<>           <div className="surface flex flex-wrap items-center gap-4 p-4">
+          <BreakdownView key={b.title + text} b={b} onIntuition={setIntuition} codeAttempt={codeAttempt} onCodeSave={setCodeAttempt} audioUrl={audioUrl} onReviewed={result=>{setPracticeStatus(reviewOutcome(result.verdict));setReviewPlan(createReviewPlan());}} logControls={<>           <div className="surface flex flex-wrap items-center gap-4 p-4">
             <span className="text-sm font-medium">Log this problem</span>
             <Select value={difficulty} onValueChange={setDifficulty}>
               <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
               <SelectContent>{DIFFICULTIES.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
             </Select>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              Confidence <ConfidencePicker value={confidence} onChange={setConfidence} />
-            </div>
-            <Button className="ml-auto" onClick={() => save.mutate()} disabled={save.isPending}>
-              <Save className="h-4 w-4" /> Save to log
-            </Button>
           </div>
-          <ReviewTracker status={practiceStatus} review={reviewPlan} onChange={(status, plan) => { setPracticeStatus(status); setReviewPlan(plan); }} />
-          {reviewPlan && <p className="text-sm text-muted-foreground">Save to log to keep these review reminders on this device.</p>}
+          <ReviewTracker status={practiceStatus} review={reviewPlan} onChange={(status, plan) => { setPracticeStatus(status); setConfidence(status==='solved'?4:2);setReviewPlan(plan); }} />
+          <Button className="mt-4" onClick={() => save.mutate()} disabled={save.isPending || practiceStatus==='untried'}><Save className="size-4" /> Save this outcome</Button>
  </>} />
         </motion.div>
       )}

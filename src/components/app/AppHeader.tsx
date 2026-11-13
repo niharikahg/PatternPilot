@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Compass, Moon, Sun } from "lucide-react";
+import { Compass, Moon, Sun, LogIn, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function ThemeToggle() {
@@ -32,7 +32,10 @@ export function Logo() {
   );
 }
 
+import { useAccount } from "./AccountProvider";
+
 export function AppHeader() {
+  const account=useAccount();
   const link = "rounded-full px-2 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground sm:px-4 sm:text-sm";
   const active = { className: "bg-foreground !text-background hover:bg-foreground" };
   return (
@@ -43,7 +46,7 @@ export function AppHeader() {
           <Link to="/workspace" className={link} activeProps={active}>Workspace</Link>
           <Link to="/dashboard" className={link} activeProps={active}>Dashboard</Link>
         </nav>
-        <div className="ml-auto shrink-0"><ThemeToggle /></div>
+        <div className="ml-auto flex shrink-0 items-center gap-1">{account.userId?<Button variant="ghost" size="icon" title={account.sync} aria-label="Sign out" onClick={()=>void account.signOut()}><LogOut className="size-4" /></Button>:<Button asChild variant="ghost" size="icon"><Link to="/auth" aria-label="Sign in"><LogIn className="size-4" /></Link></Button>}<ThemeToggle /></div>
       </div>
     </header>
   );

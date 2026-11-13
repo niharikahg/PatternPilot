@@ -10,11 +10,12 @@ export function award(session: PracticeSession, key: string, correct: boolean): 
 }
 export function earlyReveal(session: PracticeSession): PracticeSession { return {...session,early:true,attempts:session.attempts+1,combo:0}; }
 export function reviewBadge(verdict: string, issues: string[]) { return verdict==='Looks correct' ? 'Solved' : issues.length===1 ? 'Almost (1 bug)' : 'Needs work'; }
-export function todaysReview(rows: SavedProblem[]) {
- const due=rows.filter(row=>isReviewDue(row.review)).sort((a,b)=>String(nextReview(a.review)).localeCompare(String(nextReview(b.review))));
+export function todaysReview(rows: SavedProblem[], now = new Date()) {
+ const due=rows.filter(row=>isReviewDue(row.review,now)).sort((a,b)=>String(nextReview(a.review)).localeCompare(String(nextReview(b.review))));
  if(due[0]) return due[0];
- const weakest=weakestPatterns(rows,1)[0]?.pattern;
- return rows.filter(row=>row.pattern===weakest).sort((a,b)=>a.confidence-b.confidence)[0];
+ const eligible=rows.filter(row=>!nextReview(row.review)&&new Date(row.last_practiced_at??row.created_at).getTime()<=now.getTime()-86400000);
+ const weakest=weakestPatterns(eligible,1)[0]?.pattern;
+ return eligible.filter(row=>row.pattern===weakest).sort((a,b)=>a.confidence-b.confidence)[0];
 }
 export function dayKey(date = new Date()) { return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`; }
 export function recordPracticeDay() { try { const days: string[]=JSON.parse(localStorage.getItem('pp-practice-days')??'[]'); const today=dayKey(); if(!days.includes(today)) localStorage.setItem('pp-practice-days',JSON.stringify([...days,today])); } catch { /* Device storage unavailable. */ } }
