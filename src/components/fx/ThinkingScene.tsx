@@ -3,18 +3,7 @@ import { useEffect, useState } from "react";
 import { ArrowRight, Lightbulb, Loader2, Pause, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { drawWaitingQuestion } from "@/lib/waiting-questions";
-
-const QUESTIONS = [
-  { prompt: "Double n in an O(n²) algorithm. How much work now?", options: ["Twice as much", "Four times as much", "The same"], answer: 1, explanation: "(2n)² = 4n². Twice the input means roughly four times the work." },
-  { prompt: "Target is 9. Your current number is 7. What do you look up?", options: ["16", "7", "2"], answer: 2, explanation: "Look for 9 − 7 = 2 among the numbers already seen." },
-  { prompt: "Your sorted pair adds up to too little. Which pointer moves?", options: ["Left moves right", "Right moves left", "Both move inward"], answer: 0, explanation: "Moving the left pointer right increases the smaller value." },
-  { prompt: "Which problem is a natural sliding-window candidate?", options: ["Balanced brackets", "Longest substring without repeats", "Shortest graph path"], answer: 1, explanation: "A substring is contiguous. Expand the window and shrink it when a duplicate appears." },
-  { prompt: "About how many halvings reduce 1,024 candidates to one?", options: ["512", "32", "10"], answer: 2, explanation: "2¹⁰ = 1,024, so ten halvings leave one candidate." },
-  { prompt: "You push A, then B onto a stack. What comes out first?", options: ["B", "A", "Both"], answer: 0, explanation: "A stack is last in, first out: B was pushed most recently." },
-  { prompt: "All graph edges have equal cost. Which finds a shortest path?", options: ["Binary search", "Breadth-first search", "A stack alone"], answer: 1, explanation: "BFS visits nodes by distance in edges, one layer at a time." },
-  { prompt: "Your recursion solves the same state repeatedly. What helps?", options: ["More nested loops", "Sorting every time", "Memoization"], answer: 2, explanation: "Store the result for each state so repeated calls can reuse it." },
-];
+import { drawWaitingQuestion, type WaitingQuestion } from "@/lib/waiting-questions";
 
 const TIPS = [
   { tag: "Complexity fact", title: "Double the input. What happens?", body: "A linear algorithm does roughly twice the work. A quadratic one does roughly four times the work. Nested loops over the whole input are a clue to O(n²), not a guarantee.", clue: "Count how much work each loop actually does.", visual: ["n = 100", "O(n): 100", "O(n²): 10,000"] },
@@ -30,32 +19,32 @@ const TIPS = [
 /** Local learning bites appear immediately, without another AI request. */
 export function ThinkingScene() {
   const [i, setI] = useState(0);
-  const [ready, setReady] = useState(false);
-  const [finished, setFinished] = useState(false);
+  const [question, setQuestion] = useState<WaitingQuestion | null>(null);
+  const [count, setCount] = useState(0);
   const [paused, setPaused] = useState(false);
   const [selected, setSelected] = useState<number | null>(null);
   const reducedMotion = useReducedMotion();
   const draw = () => {
     let storage: Storage | undefined;
     try { storage = window.localStorage; } catch { /* Use in-memory history. */ }
-    const next = drawWaitingQuestion(TIPS.length, storage);
-    if (next === null) setFinished(true);
-    else setI(next);
+    const next = drawWaitingQuestion(storage);
+    setI(next.tipIndex);
+    setQuestion(next);
+    setCount((value) => value + 1);
     setSelected(null);
   };
-  useEffect(() => { draw(); setReady(true); }, []);
+  useEffect(() => { draw(); }, []);
   const move = () => {
-    if (selected === null || finished) return;
+    if (selected === null) return;
     draw();
   };
   useEffect(() => {
-    if (paused || reducedMotion || selected === null || finished) return;
+    if (paused || reducedMotion || selected === null) return;
     const id = setInterval(move, 20000);
     return () => clearInterval(id);
-  }, [paused, reducedMotion, i, selected, finished]);
+  }, [paused, reducedMotion, question, selected]);
   const tip = TIPS[i];
-  const question = QUESTIONS[i];
-  if (!ready || !tip || !question) return null;
+  if (!tip || !question) return null;
 
   return (
     <section aria-label="Algorithm tips while waiting" className="min-w-0 border-y py-5">
@@ -67,7 +56,7 @@ export function ThinkingScene() {
         </div>
       </div>
       <AnimatePresence mode="wait" initial={false}>
-        <motion.div key={i} initial={{ opacity: 0, y: reducedMotion ? 0 : 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: reducedMotion ? 0 : 0.18 }} className="min-h-72 py-6">
+        <motion.div key={question.id} initial={{ opacity: 0, y: reducedMotion ? 0 : 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: reducedMotion ? 0 : 0.18 }} className="min-h-72 py-6">
           <div>
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-primary"><Lightbulb className="h-4 w-4" /> {tip.tag}</p>
             <h3 className="mt-3 font-display text-2xl font-bold sm:text-3xl">{tip.title}</h3>
@@ -82,7 +71,6 @@ export function ThinkingScene() {
         </motion.div>
       </AnimatePresence>
       <div className="border-t py-4">
-        {finished ? <p className="text-sm font-medium">You’ve seen every question. Your breakdown is still on its way…</p> : <>
         <h4 className="mb-3 text-sm font-semibold">{question.prompt}</h4>
         <div className="grid gap-2">
           {question.options.map((option, index) => (
@@ -92,13 +80,12 @@ export function ThinkingScene() {
           ))}
         </div>
         {selected !== null && <p role="status" className="mt-3 text-sm leading-relaxed"><span className="font-semibold">{selected === question.answer ? "Exactly! " : "Not quite. "}</span>{question.explanation}</p>}
-        </>}
       </div>
       <div className="flex items-center justify-between gap-3 border-t pt-3">
-        <span className="font-mono text-xs text-muted-foreground">{String(i + 1).padStart(2, "0")} / {String(TIPS.length).padStart(2, "0")}</span>
+        <span className="font-mono text-xs text-muted-foreground">Question {count} · ∞</span>
         <div className="flex items-center gap-1">
           {!reducedMotion && <Button variant="ghost" size="icon" aria-label={paused ? "Resume tips" : "Pause tips"} title={paused ? "Resume tips" : "Pause tips"} onClick={() => setPaused((p) => !p)}>{paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}</Button>}
-          <Button variant="ghost" size="icon" disabled={selected === null || finished} aria-label="Next tip" title="Next tip" onClick={move}><ArrowRight className="h-4 w-4" /></Button>
+          <Button variant="ghost" size="icon" disabled={selected === null} aria-label="Next tip" title="Next tip" onClick={move}><ArrowRight className="h-4 w-4" /></Button>
         </div>
       </div>
     </section>

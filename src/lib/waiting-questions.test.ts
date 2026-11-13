@@ -7,16 +7,19 @@ function storage() {
 }
 
 describe("Shuffled waiting questions", () => {
-  it("draws all eight questions once and never repeats after exhaustion", () => {
+  it("continues beyond eight questions with unique examples", () => {
     const store = storage();
-    const draws = Array.from({ length: 8 }, () => drawWaitingQuestion(8, store, () => 0.6));
-    expect(new Set(draws).size).toBe(8);
-    expect(draws[0]).toBe(4);
-    expect(drawWaitingQuestion(8, store)).toBeNull();
+    const draws = Array.from({ length: 1000 }, () => drawWaitingQuestion(store, () => 0.6));
+    expect(new Set(draws.map((question) => question.prompt)).size).toBe(1000);
+    expect(new Set(draws.slice(0, 8).map((question) => question.tipIndex)).size).toBe(8);
+    expect(draws.every((q) => q.answer >= 0 && q.answer < q.options.length)).toBe(true);
   });
   it("keeps history across separate waiting panels", () => {
     const store = storage();
-    expect(drawWaitingQuestion(8, store, () => 0)).toBe(0);
-    expect(drawWaitingQuestion(8, store, () => 0)).toBe(1);
+    const first = drawWaitingQuestion(store, () => 0);
+    const second = drawWaitingQuestion(store, () => 0);
+    expect(first.tipIndex).toBe(0);
+    expect(second.tipIndex).toBe(1);
+    expect(first.id).not.toBe(second.id);
   });
 });
