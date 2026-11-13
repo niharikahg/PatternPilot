@@ -1,4 +1,7 @@
 # Current fixes
+- [x] Clarify bug editor and add input-only first hints before full explanations.
+- [x] Draw both string inputs and acknowledge valid slower anagram guesses.
+- [x] Update seven-step wording and verify the final guest flow.
 - [x] Distinguish wrong/right picks; restore opt-in walkthrough explanations.
 - [x] Separate bug practice from answers, simplify puzzles, and hide review hints until requested.
 - [x] Remove preset spoilers and prepare all sixteen breakdowns and narration.

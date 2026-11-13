@@ -49,4 +49,5 @@ use the editor.
 - Keep rewards inline in the result header, never as floating overlays, so feedback cannot cover activity navigation.
 - Map AI correctness reviews to saved practice status and schedule new review plans no earlier than the following day; Today’s review excludes future scheduled and recently practiced rows.
 - Open bundled preset debugging challenges on request; generate new/custom puzzles only on request and review edited code statically, never executing user submissions.
-- Use shared right/wrong guess states for pattern and complexity picks; reveal walkthrough explanations and unsuccessful review hints only on explicit request so learners can retry unaided.
+- Use shared guess states, acknowledge documented valid slower alternatives, and reveal unsuccessful review hints as input-only then explanation so learners can retry unaided.
+- Parse named string inputs from the example for paired walkthrough tile rows so both operands remain visible without revealing algorithm state.
