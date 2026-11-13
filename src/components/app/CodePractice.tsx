@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { reviewCode, type CodeFeedback } from "@/lib/code-review.functions";
 import type { SavedProblem } from "@/lib/local-log";
+import { reviewBadge } from "@/lib/practice";
+import { Badge } from "@/components/ui/badge";
 
-export function CodePractice({ problem, attempt, onSave }: { problem: string; attempt?: SavedProblem["code_attempt"]; onSave: (attempt: NonNullable<SavedProblem["code_attempt"]>) => void }) {
+export function CodePractice({ problem, attempt, onSave, onSubmitted, onReviewed }: { problem: string; attempt?: SavedProblem["code_attempt"]; onSave: (attempt: NonNullable<SavedProblem["code_attempt"]>) => void; onSubmitted?: () => void; onReviewed?: (feedback: CodeFeedback) => void }) {
   const review = useServerFn(reviewCode);
   const [language, setLanguage] = useState<"python" | "java" | "javascript">(attempt?.language === "java" ? "java" : attempt?.language === "javascript" ? "javascript" : "python");
   const [code, setCode] = useState(attempt?.code ?? "");
@@ -18,7 +20,8 @@ export function CodePractice({ problem, attempt, onSave }: { problem: string; at
   const submit = async () => {
     setPending(true); setError(""); setFeedback(null);
     onSave({ language, code });
-    try { const result = await review({ data: { problem, language, code } }); setFeedback(result); onSave({ language, code, feedback: JSON.stringify(result) }); }
+    onSubmitted?.();
+    try { const result = await review({ data: { problem, language, code } }); setFeedback(result); onReviewed?.(result); onSave({ language, code, feedback: JSON.stringify(result) }); }
     catch (e) { setError(e instanceof Error ? e.message : "Review unavailable."); }
     finally { setPending(false); }
   };
@@ -29,6 +32,6 @@ export function CodePractice({ problem, attempt, onSave }: { problem: string; at
     <Textarea id="practice-code" value={code} disabled={pending} onChange={(event) => { setCode(event.target.value); setFeedback(null); onSave({ language, code: event.target.value }); }} placeholder="Write your solution here…" className="min-h-64 bg-code font-mono text-sm" spellCheck={false} />
     <div className="mt-3 flex flex-wrap items-center justify-between gap-3"><p className="text-xs text-muted-foreground">AI code review · Estimated complexity, not measured runtime or executed tests.</p><Button disabled={pending || !code.trim()} onClick={() => void submit()}>{pending ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}{pending ? "Reviewing your solution…" : "Review my code"}</Button></div>
     {error && <p role="alert" className="mt-3 text-sm text-destructive">{error}</p>}
-    {feedback && <div className="mt-5 space-y-4" aria-live="polite"><h4 className="font-semibold">{feedback.verdict}</h4><p className="font-mono text-sm">Time: {feedback.time} · Space: {feedback.space}</p><p className="text-sm leading-relaxed">{feedback.explanation}</p>{feedback.issues.length > 0 && <div><h4 className="font-semibold">Watch out for</h4><ul className="list-disc pl-5 text-sm">{feedback.issues.map((item) => <li key={item}>{item}</li>)}</ul></div>}<div><h4 className="font-semibold">Make it better</h4><ul className="list-disc pl-5 text-sm">{feedback.improvements.map((item) => <li key={item}>{item}</li>)}</ul></div><details><summary className="cursor-pointer text-sm font-semibold">Suggested solution</summary><pre className="mt-3 overflow-x-auto rounded-md border bg-code p-4 text-sm"><code>{feedback.improved_code}</code></pre></details></div>}
+    {feedback && <div className="mt-5 space-y-4" aria-live="polite"><Badge>{reviewBadge(feedback.verdict, feedback.issues)}</Badge><p className="text-xs text-muted-foreground">AI assessment, not executed tests.</p><p className="font-mono text-sm">Time: {feedback.time} · Space: {feedback.space}</p><p className="text-sm leading-relaxed">{feedback.explanation}</p>{feedback.issues.length > 0 && <div><h4 className="font-semibold">Watch out for</h4><ul className="list-disc pl-5 text-sm">{feedback.issues.map((item) => <li key={item}>{item}</li>)}</ul></div>}<div><h4 className="font-semibold">Make it better</h4><ul className="list-disc pl-5 text-sm">{feedback.improvements.map((item) => <li key={item}>{item}</li>)}</ul></div><details><summary className="cursor-pointer text-sm font-semibold">Suggested solution</summary><pre className="mt-3 overflow-x-auto rounded-md border bg-code p-4 text-sm"><code>{feedback.improved_code}</code></pre></details></div>}
   </section>;
 }
