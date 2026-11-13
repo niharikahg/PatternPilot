@@ -30,7 +30,7 @@ export function WorkspaceGuide({ onTryExample }: { onTryExample: () => void }) {
           <ol className="mt-4 grid gap-4 sm:grid-cols-3">
             {[
               { icon: BookOpen, title: "Pick a problem", text: "Choose one below, or paste your own question." },
-              { icon: Sparkles, title: "Generate your breakdown", text: "Press Generate breakdown. Try a thinking question while you wait." },
+              { icon: Sparkles, title: "Find your approach", text: "Press Show me the approach. Try a thinking question while you wait." },
               { icon: ArrowRight, title: "Explore, then save", text: "Open any of the six cards. Save to log when you’re ready to revisit it." },
             ].map(({ icon: Icon, title, text }, index) => (
               <li key={title} className="flex items-start gap-3">
