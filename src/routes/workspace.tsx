@@ -25,6 +25,7 @@ import { motion } from "framer-motion";
 import { Ambient } from "@/components/fx/Ambient";
 import { ThinkingScene } from "@/components/fx/ThinkingScene";
 import { WorkspaceGuide } from "@/components/app/WorkspaceGuide";
+import { hasChosenConfidence } from '@/lib/confidence-choice';
 
 export const Route = createFileRoute("/workspace")({
   head: () => ({
@@ -99,7 +100,7 @@ function Workspace() {
 
   const save = useMutation({
     mutationFn: async () => {
-      if (!b || confidence === null) throw new Error("Choose your confidence before saving.");
+      if (!b || !hasChosenConfidence(confidence)) throw new Error("Choose your confidence before saving.");
       return addProblem({ title: b.title, problem_text: text, pattern: b.pattern.name, difficulty, confidence, intuition, breakdown: b, practice_status: practiceStatus, review: reviewPlan, last_practiced_at: new Date().toISOString(), ...(codeAttempt ? { code_attempt: codeAttempt } : {}) });
     },
     onSuccess: () => {
