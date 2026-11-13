@@ -1,5 +1,5 @@
-import { useState, type ReactNode } from "react";
-import { ArrowUpRight, BookOpen, Check, Code2, Copy, Gauge, Layers, ListChecks, Workflow } from "lucide-react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, BookOpen, Check, Code2, Copy, Gauge, Layers, ListChecks, Workflow, Play, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +16,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { CodePractice } from "./CodePractice";
 import type { SavedProblem } from "@/lib/local-log";
 import { storyWithEnding } from "@/lib/story-ending";
-import { useMemo } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Lang = keyof Breakdown["solution"];
 const STEPS = ["Understand", "Examples", "Pattern", "Approach", "Solution", "Complexity"] as const;
@@ -37,6 +37,17 @@ function H({ children }: { children: ReactNode }) {
 export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave }: { b: Breakdown; actions?: ReactNode; onIntuition?: (score: number) => void; codeAttempt?: SavedProblem["code_attempt"]; onCodeSave?: (attempt: NonNullable<SavedProblem["code_attempt"]>) => void }) {
   const [combo, setCombo] = useState(0);
   const playbackStory = useMemo(() => storyWithEnding(b), [b]);
+  const [tab, setTab] = useState("story");
+  const navigationRef = useRef<HTMLDivElement>(null);
+  const views = [
+    { id: "story", label: "Story", icon: Play },
+    { id: "lab", label: "Complexity", icon: FlaskConical },
+    { id: "visual", label: "Walkthrough", icon: Workflow },
+    { id: "code", label: "Your code", icon: Code2 },
+    { id: "cards", label: "Flashcards", icon: Layers },
+  ];
+  const activeIndex = views.findIndex((view) => view.id === tab);
+  const switchView = (value: string) => { setTab(value); navigationRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); };
   const [tally, setTally] = useState({ correct: 0, attempts: 0 });
   const answer = (correct: boolean) => {
     const c = nextCombo(combo, correct);
@@ -145,12 +156,21 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
         </div>
       </div>
 
-      {playbackStory && <StoryMode story={playbackStory} onAnswer={answer} />}
+      <Tabs value={tab} onValueChange={switchView}>
+        <div ref={navigationRef} className="sticky top-16 z-20 scroll-mt-16 border-y bg-background py-3">
+          <TabsList aria-label="Problem activities" className="grid h-auto w-full grid-cols-3 gap-1 bg-transparent p-0 sm:grid-cols-5">
+            {views.map(({ id, label, icon: Icon }, index) => <TabsTrigger key={id} value={id} className="flex min-h-12 flex-col gap-1 px-1 py-2 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground sm:flex-row sm:gap-2 sm:text-sm"><Icon className="size-4 shrink-0" /><span>{index + 1}. {label}</span></TabsTrigger>)}
+          </TabsList>
+        </div>
+      <TabsContent forceMount value="story" className="pt-4 data-[state=inactive]:hidden">
+        {playbackStory ? <StoryMode story={playbackStory} onAnswer={answer} /> : <p className="py-6 text-muted-foreground">No story was saved for this problem. Explore the other activities.</p>}
+      </TabsContent>
 
-      {b.complexity_lab && <ComplexityLab lab={b.complexity_lab} code={b.solution.python} onAnswer={answer} />}
-      <Visualizer viz={b.visualization} />
-      <CodePractice problem={`${b.title}\n${b.understand.restatement}\nInput: ${b.understand.inputs}\nOutput: ${b.understand.outputs}\nConstraints: ${b.understand.constraints.join("; ")}`} attempt={codeAttempt} onSave={onCodeSave ?? (() => {})} />
+      <TabsContent forceMount value="lab" className="pt-4 data-[state=inactive]:hidden">{b.complexity_lab ? <ComplexityLab lab={b.complexity_lab} code={b.solution.python} onAnswer={answer} /> : <p className="py-6">Time {b.complexity.time} · Space {b.complexity.space}</p>}</TabsContent>
+      <TabsContent forceMount value="visual" className="pt-4 data-[state=inactive]:hidden">{b.visualization.kind !== "none" && b.visualization.frames.length ? <Visualizer viz={b.visualization} /> : <p className="py-6 text-muted-foreground">This problem has no step-through visual. Check its Approach flashcard instead.</p>}</TabsContent>
+      <TabsContent forceMount value="code" className="pt-4 data-[state=inactive]:hidden"><CodePractice problem={`${b.title}\n${b.understand.restatement}\nInput: ${b.understand.inputs}\nOutput: ${b.understand.outputs}\nConstraints: ${b.understand.constraints.join("; ")}`} attempt={codeAttempt} onSave={onCodeSave ?? (() => {})} /></TabsContent>
 
+      <TabsContent forceMount value="cards" className="pt-4 data-[state=inactive]:hidden">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {STEPS.map((label, i) => {
           const Icon = ICONS[i] ?? BookOpen;
@@ -172,6 +192,13 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
           <div className="min-w-0">{opened === null ? null : body[opened]}</div>
         </DialogContent>
       </Dialog>
+      </TabsContent>
+      <div className="mt-5 flex items-center justify-between gap-3 border-t pt-4">
+        <Button variant="ghost" size="sm" disabled={activeIndex === 0} onClick={() => { const previous = views[activeIndex - 1]; if (previous) switchView(previous.id); }}><ArrowLeft className="size-4" /> Back</Button>
+        <span className="text-xs text-muted-foreground">{activeIndex + 1} of {views.length}</span>
+        <Button size="sm" disabled={activeIndex === views.length - 1} onClick={() => { const next = views[activeIndex + 1]; if (next) switchView(next.id); }}>{views[activeIndex + 1]?.label ?? "All activities"}<ArrowRight className="size-4" /></Button>
+      </div>
+      </Tabs>
 
       <AnimatePresence>
         {combo > 0 && (

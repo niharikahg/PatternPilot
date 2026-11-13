@@ -36,6 +36,7 @@ use the editor.
 - Waiting-screen questions and answer explanations stay local with the tips; interactions must not add AI requests or delay the result.
 - Waiting questions are an ongoing local procedural stream: shuffle concept families without replacement per cycle, vary each cycle's examples, and persist the cycle and remaining families on device; never stop at a finite bank or add AI latency.
 - Render the six breakdown sections as shared preview flashcards opening scrollable detail dialogs, so workspace and saved problems remain consistent.
+- Present result activities in ordered, sticky tabs with back/next navigation; keep panels mounted so narration prepares immediately and drafts and activity state survive tab switches.
 - Keep workspace onboarding device-local and separate input/waiting from the review state; guide dismissal must not require an account or send extra requests.
 - Prepare story narration automatically when a breakdown is available, cache it in player memory, and preload audio before enabling narrated playback; append a solution epilogue from the breakdown so stories connect to the algorithm, data structure, and complexity without extra text-generation calls.
 - Code submissions receive static AI correctness and complexity analysis, never execution or fabricated timing; drafts and feedback are stored with device-local saved problems.
