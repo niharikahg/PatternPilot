@@ -12,7 +12,7 @@ const obj = (properties: Record<string, unknown>) => ({
 });
 const cell = obj({ row: { type: "integer" }, col: { type: "integer" } });
 
-const schema = obj({
+export const breakdownSchema = obj({
   title: str,
   difficulty: { type: "string", enum: ["Easy", "Medium", "Hard"] },
   understand: obj({
@@ -71,12 +71,13 @@ const schema = obj({
   }),
 });
 
-const SYSTEM = `You are a senior software engineering interviewer coaching a career switcher or new grad.
+export const BREAKDOWN_SYSTEM = `You are a senior software engineering interviewer coaching a career switcher or new grad.
 Break the given coding interview problem into a structured 6-step framework. Be precise, plain-English, and concise.
 Rules:
 - understand: restate clearly; exactly 2 clarifying questions to ask the interviewer.
 - examples: 2-3 test cases including at least one edge case.
 - pattern.name must be one of: ${PATTERNS.join(", ")}.
+- Choose the single best category with a one-sentence justification in pattern.why. Integer reversal belongs to Math & Bit Manipulation; atoi/string-to-integer belongs to String Parsing, never Stack or Greedy. Linked-list reversal belongs to Linked List; grid traversal belongs to Graphs.
 - approach: describe brute force first, then the optimized approach, each with clear pseudocode.
 - solution: clean, idiomatic, commented code for the optimized approach in Python, Java and JavaScript.
 - complexity: Big-O with a plain-English explanation, plus 3 common interviewer follow-up questions.
@@ -88,6 +89,7 @@ Rules:
 - story: retell the problem as a fun, vivid mini-story with a cast (e.g. Two Sum = a shopkeeper finding two coins worth exactly 9). 5 scenes: setup, goal, the trap (slow way), the aha (the pattern), the win.
   Each scene has 2-8 actors (one per input item or character), each with a single emoji, short label (the value), x and y as percent positions 5-95 on a stage. Keep the same actor ids across scenes so they animate between positions; change state to show focus ("active"), finished ("done") or eliminated ("faded").
   Captions: write a continuous narrated adventure, not a list of algorithm instructions. Use a named protagonist, a concrete setting, a goal, a setback, dialogue, a clever discovery, and a satisfying ending. Each of the 5 scenes should have 35-55 spoken words that connect naturally to the next scene, while accurately mapping the plot to the algorithm and example values. Let the actors enact the events in the caption; keep positions between 15-85 to avoid clipping. Scenes 3 and 4 include an optional reflection question (3 options, answer = correct index, hint = gentle nudge); others use null. The film itself must make sense without answering any questions.
+- In the story's final scene explicitly connect the protagonist's clever action to the coding solution. Name the actual data structure used (or say no additional structure is needed), explain what it stores and which operations make the solution efficient. Ensure approach.optimized names that structure and describes concrete steps; pattern.why maps the story's objects/actions to the input and algorithm.
 - complexity_lab: growth classes for brute force time, optimized time and optimized space; code_hotspots = 1-3 zero-based line numbers in the python solution that dominate cost, with runs (e.g. "n times") and why (one sentence).
 Return JSON matching the schema.`;
 
@@ -105,10 +107,10 @@ export const generateBreakdown = createServerFn({ method: "POST" })
     try {
       const res = await generateResponse({
         model: "openai/gpt-6-astra",
-        instructions: SYSTEM,
+        instructions: BREAKDOWN_SYSTEM,
         reasoning: { effort: "low" },
         input: [{ role: "user", content: `Problem:\n${data.problem}\n\nReturn JSON.` }],
-        text: { format: { type: "json_schema", name: "breakdown", strict: true, schema } },
+        text: { format: { type: "json_schema", name: "breakdown", strict: true, schema: breakdownSchema } },
       });
       const output = ((res as unknown as { output?: OutputItem[] }).output ?? []);
       const text = output

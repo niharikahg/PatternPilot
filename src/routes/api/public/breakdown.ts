@@ -1,0 +1,2 @@
+import { createFileRoute } from '@tanstack/react-router';
+export const Route=createFileRoute('/api/public/breakdown')({server:{handlers:{POST:async({request})=>{const {streamBreakdown}=await import('@/lib/breakdown-stream.server');return streamBreakdown(request);}}}});

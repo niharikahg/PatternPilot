@@ -1,13 +1,19 @@
 export const PATTERNS = [
-  "Hash Map",
+  "Arrays & Hashing",
   "Two Pointers",
   "Sliding Window",
   "Stack",
   "Binary Search",
-  "BFS/DFS",
+  "Linked List",
+  "Trees",
+  "Graphs",
+  "Heap",
+  "Backtracking",
   "Dynamic Programming",
   "Greedy",
   "Intervals",
+  "Math & Bit Manipulation",
+  "String Parsing",
 ] as const;
 export type Pattern = (typeof PATTERNS)[number];
 export const DIFFICULTIES = ["Easy", "Medium", "Hard"] as const;

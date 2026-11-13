@@ -1,4 +1,4 @@
-import type { Breakdown } from "./types";
+import { PATTERNS, type Breakdown, type Pattern } from "./types";
 import type { PracticeStatus, ReviewPlan } from "./review";
 
 export type SavedProblem = {
@@ -20,7 +20,8 @@ const KEY = "pp-problem-log";
 
 export function listProblems(): SavedProblem[] {
   try {
-    return JSON.parse(localStorage.getItem(KEY) ?? "[]") as SavedProblem[];
+    const rows=JSON.parse(localStorage.getItem(KEY) ?? "[]") as SavedProblem[];
+    return rows.map(row=>{ const title=row.title.toLowerCase();const name:Pattern=title.includes('atoi')||title.includes('string to integer')?'String Parsing':title.includes('reverse integer')?'Math & Bit Manipulation':row.pattern==='Hash Map'?'Arrays & Hashing':row.pattern==='BFS / DFS'?'Graphs':PATTERNS.includes(row.pattern as Pattern)?row.pattern as Pattern:'Arrays & Hashing';return {...row,pattern:name,breakdown:{...row.breakdown,pattern:{...row.breakdown.pattern,name}}}; });
   } catch {
     return [];
   }
