@@ -7,7 +7,7 @@ export type SavedProblem = {
   pattern: string;
   difficulty: string;
   confidence: number;
-  intuition?: number;
+  intuition?: number | undefined;
   breakdown: Breakdown;
   created_at: string;
 };
