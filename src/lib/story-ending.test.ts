@@ -16,5 +16,5 @@ describe('story solution ending',()=>{
   expect(story?.scenes[1]?.caption).toContain('O(n)');
   expect(b.story?.scenes).toHaveLength(1);
  });
- it('preserves older problems without a story',()=>{expect(storyWithEnding({...b,story:undefined})).toBeNull();});
+ it('preserves older problems without a story',()=>{const { story, ...withoutStory } = b; expect(storyWithEnding(withoutStory)).toBeNull(); expect(story).toBeDefined();});
 });
