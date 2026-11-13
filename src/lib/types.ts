@@ -42,5 +42,22 @@ export type Breakdown = {
   };
   solution: { python: string; java: string; javascript: string };
   complexity: { time: string; space: string; explanation: string; follow_ups: string[] };
+  story?: Story;
+  complexity_lab?: ComplexityLab;
   visualization: { kind: "array" | "string" | "linked_list" | "grid" | "none"; frames: Frame[] };
+};
+
+
+export type Actor = { id: string; label: string; emoji: string; x: number; y: number; state: "idle" | "active" | "done" | "faded" };
+export type StoryScene = {
+  caption: string;
+  actors: Actor[];
+  question: { prompt: string; options: string[]; answer: number; hint: string } | null;
+};
+export type Story = { title: string; scenes: StoryScene[] };
+export type ComplexityLab = {
+  brute_force_time: import("./game").Growth;
+  optimized_time: import("./game").Growth;
+  optimized_space: import("./game").Growth;
+  code_hotspots: { line: number; runs: string; why: string }[];
 };
