@@ -5,7 +5,7 @@
 - [ ] Show early Understand prominently while custom results continue loading.
 - [ ] Add AI spot-the-bug practice and more presets.
 - [ ] Remove optional sign-in and account sync per the latest guest-only request; collect no user details.
-- [ ] Run rule tests and verify real practice and signed-in progress flows.
+- [ ] Run rule tests and verify real guest practice flows.
 
 # Tasks
 - [x] Reorder results into Understand, Guess, Walkthrough, Code, Reveal, and Log; gate answers and move solution hotspots.
