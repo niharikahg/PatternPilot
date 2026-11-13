@@ -90,7 +90,7 @@ function Workspace() {
 
       <WorkspaceGuide onTryExample={() => { const example = LIBRARY.find((p) => p.title === "Two Sum"); if (example) pickProblem(example.title, example.text); }} />
       <ol aria-label="Problem progress" className="mt-5 grid grid-cols-3 border-b pb-4">
-        {["Pick a problem", "Generate", "Explore & save"].map((label, i) => {
+        {["Pick a problem", "Find the approach", "Explore & save"].map((label, i) => {
           const current = run.isPending ? 1 : stage;
           return <li key={label} aria-current={i === current ? "step" : undefined} className={cn("flex items-center gap-2 text-xs sm:text-sm", i === current ? "font-semibold text-foreground" : "text-muted-foreground")}><span className={cn("grid size-7 shrink-0 place-items-center rounded-full border font-mono text-xs", i === current && "border-primary bg-primary text-primary-foreground")}>
             {i < current ? <Check className="size-3" /> : i + 1}
@@ -131,11 +131,11 @@ function Workspace() {
         />
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t pt-3">
           <span className="text-xs text-muted-foreground">{text.trim().length < 10 ? "Choose a problem above or paste a complete question." : "Ready for your six-step breakdown"}</span>
-          <div className="ml-auto flex items-center gap-2">
-          {!run.isPending && text.trim().length >= 10 && <span aria-hidden="true" className="text-2xl motion-safe:animate-bounce">👉</span>}
+          <div className="relative ml-auto flex items-center py-3 pl-12">
+          {!run.isPending && text.trim().length >= 10 && <span aria-hidden="true" className="pointer-events-none absolute left-0 top-0 z-10 text-6xl leading-none motion-safe:animate-bounce">👉</span>}
           <Button className="rounded-full px-5 shadow-pop" onClick={() => run.mutate(text)} disabled={run.isPending || text.trim().length < 10}>
             {run.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-            {run.isPending ? "Breaking it down…" : "Generate breakdown"}
+            {run.isPending ? "Finding your approach…" : "Show me the approach"}
           </Button>
           </div>
         </div>
