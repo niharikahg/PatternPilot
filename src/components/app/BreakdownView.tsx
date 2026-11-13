@@ -23,6 +23,8 @@ import { storyWithEnding } from "@/lib/story-ending";
 import { award, earlyReveal, freshSession, recordPracticeDay, type PracticeSession } from "@/lib/practice";
 import type { Growth } from "@/lib/game";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Link } from "@tanstack/react-router";
+import { reviewProblemContext } from "@/lib/review-context";
 import { canOpenPracticeStep } from "@/lib/practice-order";
 import { restartProblem } from "@/lib/problem-restart";
 
@@ -64,10 +66,10 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
   const navigationRef = useRef<HTMLDivElement>(null);
   const views = [
     { id: "understand", label: "Understand", icon: BookOpen },
+    { id: "guess", label: "Guess", icon: FlaskConical },
     { id: "walkthrough", label: "Walkthrough", icon: Play },
     { id: "code", label: "Your code", icon: Code2 },
     { id: "bug", label: "Spot the bug", icon: Bug },
-    { id: "guess", label: "Guess", icon: FlaskConical },
     { id: "reveal", label: "Reveal", icon: Layers },
     { id: "log", label: "Log it", icon: Check },
   ];
@@ -102,7 +104,7 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
       <H>Ask the interviewer</H>
       <ul className="space-y-2 text-sm">
         {b.understand.clarifying_questions.map((q) => (
-          <li key={q} className="rounded-md border-l-2 border-primary bg-primary-soft px-3 py-2">{q}</li>
+          <li key={q} className="list-disc ml-5 text-muted-foreground">{q}</li>
         ))}
       </ul>
     </div>,
@@ -165,7 +167,7 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
       <div className="flex flex-wrap items-center gap-3">
         <h2 className="text-xl font-semibold tracking-tight">{b.title}</h2>
         <Badge variant="secondary">{b.difficulty}</Badge>
-        <Badge variant={burst ? "secondary" : "outline"} aria-live="polite">{burst ? "🔥 " : ""}{session.xp} XP · intuition {intuitionScore(session.correct,session.attempts)}% · {session.combo}×</Badge>
+        <Badge title="XP: practice rewards. Intuition: percentage of correct practice answers. ×: consecutive correct answers." variant={burst ? "secondary" : "outline"} aria-live="polite">{burst ? "🔥 " : ""}{session.xp} XP · intuition {intuitionScore(session.correct,session.attempts)}% · {session.combo}×</Badge>
         <div className="ml-auto flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={restart}><RotateCcw className="size-4" /> Restart this problem</Button>
           <Button variant="outline" size="sm" disabled={!unlocked} onClick={copy}>
@@ -184,8 +186,8 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
         <TabsContent value="understand" className="space-y-5 pt-4"><h3 className="font-display text-xl font-bold">Understand the problem</h3>{body[0]}<h3 className="font-display text-xl font-bold">Examples</h3>{body[1]}</TabsContent>
         <TabsContent value="guess" className="space-y-5 pt-4"><h3 className="font-display text-xl font-bold">Which pattern fits?</h3><div className="grid gap-2 sm:grid-cols-2">{patternOptions.map(option=>{const state=validSlowerGuess(b,option)&&session.patternGuess===option?'selected':guessState(option,session.patternGuess,b.pattern.name);return <Button key={option} variant="outline" aria-pressed={session.patternGuess===option} className={cn('h-auto min-h-12 whitespace-normal disabled:opacity-100',state==='correct'&&'border-success bg-success/15 text-success ring-2 ring-success',state==='selected'&&'border-primary bg-primary-soft text-primary ring-2 ring-primary',state==='wrong'&&'border-destructive bg-destructive/10 text-destructive ring-2 ring-destructive')} disabled={Boolean(session.patternGuess)} onClick={()=>prediction('pattern',option,option===b.pattern.name)}>{state==='correct'&&<Check className="size-4" />}{state==='wrong'&&<X className="size-4" />}{option}</Button>;})}</div>{session.patternGuess&&<p role="status" className={cn('text-sm',session.patternGuess===b.pattern.name?'text-success':validSlowerGuess(b,session.patternGuess)?'text-primary':'text-destructive')}>{patternVerdict(b,session.patternGuess)}</p>}{b.complexity_lab&&<ComplexityLab mode="guess" lab={b.complexity_lab} code="" initialBet={session.complexityGuess as Growth | undefined} onBet={value=>prediction('complexity',value,value===b.complexity_lab?.optimized_time)} onAnswer={()=>{}} />}</TabsContent>
         <TabsContent forceMount value="walkthrough" className="space-y-5 pt-4 data-[state=inactive]:hidden"><Visualizer viz={b.visualization} exampleInput={b.examples[0]?.input??""} hideTechnique={!unlocked} />{playbackStory&&<StoryMode story={playbackStory} onAnswer={answer} allowEnding={unlocked} audioUrl={audioUrl} />}</TabsContent>
-        <TabsContent forceMount value="code" className="pt-4 data-[state=inactive]:hidden"><CodePractice solutionsUnlocked={unlocked} problem={`${b.title}\n${b.understand.restatement}\n${b.understand.constraints.join('; ')}`} attempt={restartCount>0?freshAttempt:codeAttempt} onSave={attempt=>{setFreshAttempt(attempt);onCodeSave?.(attempt);}} onSubmitted={()=>setSession(prev=>({...prev,submitted:true}))} onReviewed={result=>{ onReviewed?.(result); if(result.verdict==='Looks correct') {setSession(prev=>award(prev,'code',true)); setBurst(true);recordPracticeDay();} }} /><Button variant="ghost" className="mt-3" disabled={session.submitted||session.early} onClick={revealEarly}><Lock className="size-4" /> I'm stuck, reveal</Button></TabsContent>
-        <TabsContent forceMount value="bug" className="pt-4 data-[state=inactive]:hidden"><BugPractice problem={b.understand.restatement} title={b.title} sessionKey={sessionKey} /></TabsContent>
+        <TabsContent forceMount value="code" className="pt-4 data-[state=inactive]:hidden"><CodePractice solutionsUnlocked={unlocked} problem={reviewProblemContext(b.title,b.understand.restatement,b.understand.constraints)} attempt={restartCount>0?freshAttempt:codeAttempt} onSave={attempt=>{setFreshAttempt(attempt);onCodeSave?.(attempt);}} onSubmitted={()=>setSession(prev=>({...prev,submitted:true}))} onReviewed={result=>{ onReviewed?.(result); if(result.verdict==='Looks correct') {setSession(prev=>award(prev,'code',true)); setBurst(true);recordPracticeDay();} }} /><Button variant="ghost" className="mt-3" disabled={session.submitted||session.early} onClick={revealEarly}><Lock className="size-4" /> I'm stuck, reveal</Button></TabsContent>
+        <TabsContent forceMount value="bug" className="pt-4 data-[state=inactive]:hidden"><BugPractice constraints={b.understand.constraints} problem={b.understand.restatement} title={b.title} sessionKey={sessionKey} /></TabsContent>
         <TabsContent value="reveal" className="space-y-5 pt-4">
         {!unlocked&&<div className="flex flex-wrap items-center gap-3"><Lock className="size-5" /><p className="text-sm">Submit your code for review to unlock the answers.</p><Button variant="outline" onClick={revealEarly}>I'm stuck, reveal</Button></div>}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -194,7 +196,7 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
           const Icon = ICONS[i] ?? BookOpen;
           return (
             <Button key={label} variant="outline" aria-label={`Open ${label}`} disabled={!unlocked} onClick={() => { if(unlocked) setOpened(i); }} className={cn("group h-52 min-w-0 flex-col items-stretch justify-between whitespace-normal rounded-lg p-5 text-left transition-transform motion-safe:hover:-translate-y-1", i === 0 && "border-highlight bg-highlight text-highlight-foreground hover:bg-highlight/90", i === 4 && "border-foreground bg-foreground text-background hover:bg-foreground/90 hover:text-background")}>
-              <span className="flex items-center justify-between"><Icon className="size-5" /><span className="font-mono text-xs opacity-60">0{i + 1}</span></span>
+              <span className="flex items-center justify-between"><Icon className="size-5" /><span className="font-mono text-xs opacity-60">0{i - 1}</span></span>
               <span><span className="block font-display text-xl font-bold">{label}</span><span className={cn("mt-2 line-clamp-2 text-sm font-normal leading-relaxed opacity-75",!unlocked&&"blur-sm")} >{unlocked?previews[i]:"Try your idea before uncovering the answer"}</span></span>
               {unlocked?<ArrowUpRight className="ml-auto size-4" />:<Lock className="ml-auto size-5" />}
             </Button>
@@ -216,7 +218,7 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
       <div className="mt-5 flex items-center justify-between gap-3 border-t pt-4">
         <Button variant="ghost" size="sm" disabled={activeIndex === 0} onClick={() => { const previous = views[activeIndex - 1]; if (previous) switchView(previous.id); }}><ArrowLeft className="size-4" /> Back</Button>
         <span className="text-xs text-muted-foreground">{activeIndex + 1} of {views.length}</span>
-        <Button size="sm" disabled={activeIndex === views.length - 1 || (session.step==='guess'&&!guessed)} onClick={() => { const next = views[activeIndex + 1]; if (next) switchView(next.id); }}>Next: {views[activeIndex + 1]?.label ?? "Done"}<ArrowRight className="size-4" /></Button>
+        {activeIndex===views.length-1?<Button asChild size="sm"><Link to="/dashboard">Go to Dashboard<ArrowRight className="size-4" /></Link></Button>:<Button size="sm" disabled={ (session.step==='guess'&&!guessed)} onClick={() => { const next = views[activeIndex + 1]; if (next) switchView(next.id); }}>Next: {views[activeIndex + 1]?.label ?? "Done"}<ArrowRight className="size-4" /></Button>}
       </div>
       </Tabs>
 

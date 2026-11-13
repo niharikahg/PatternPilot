@@ -59,7 +59,7 @@ function Workspace() {
   const [codeAttempt, setCodeAttempt] = useState<SavedProblem["code_attempt"]>();
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
-  const stage = reviewing ? 2 : 0;
+  const stage = reviewing ? 1 : 0;
 
   useEffect(()=>{try{const saved=JSON.parse(localStorage.getItem('pp-workspace')??'null');if(saved){setText(saved.text??'');setPicked(saved.picked??null);setB(saved.b??null);setReviewing(Boolean(saved.b));setCodeAttempt(saved.codeAttempt);setConfidence(saved.confidence??3);setDifficulty(saved.difficulty??'Medium');setPracticeStatus(saved.practiceStatus??'untried');setReviewPlan(saved.reviewPlan);if(saved.b)prepareAudio(saved.b);}}catch{}setRestored(true);},[]);
   useEffect(()=>{if(restored)try{localStorage.setItem('pp-workspace',JSON.stringify({text,picked,b:reviewing?b:null,codeAttempt,confidence,difficulty,practiceStatus,reviewPlan}));}catch{}},[restored,text,picked,b,reviewing,codeAttempt,confidence,difficulty,practiceStatus,reviewPlan]);
@@ -117,12 +117,12 @@ function Workspace() {
       <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-4xl font-extrabold md:text-6xl">
         What are we <span className="inline-block -rotate-2 rounded-2xl bg-highlight px-3 text-highlight-foreground">cracking</span> today?
       </motion.h1>
-      <p className="mt-2 text-muted-foreground">{reviewing ? "Your breakdown is ready. Start with Understand, try your code, then guess before revealing answers." : "Start with a practice problem below, or paste your own."}</p>
+      <p className="mt-2 text-muted-foreground">{reviewing ? "Your breakdown is ready. Start with Understand and Guess, then explore the walkthrough and try your code." : "Start with a practice problem below, or paste your own."}</p>
 
       <WorkspaceGuide onTryExample={() => { const example = LIBRARY.find((p) => p.title === "Two Sum"); if (example) pickProblem(example.title, example.text); }} />
-      <ol aria-label="Problem progress" className="mt-5 grid grid-cols-3 border-b pb-4">
-        {["Pick a problem", "Find the approach", "Explore & save"].map((label, i) => {
-          const current = run.isPending ? 1 : stage;
+      <ol aria-label="Problem progress" className="mt-5 grid grid-cols-2 border-b pb-4">
+        {["Pick a problem", "Practise & save"].map((label, i) => {
+          const current = stage;
           return <li key={label} aria-current={i === current ? "step" : undefined} className={cn("flex items-center gap-2 text-xs sm:text-sm", i === current ? "font-semibold text-foreground" : "text-muted-foreground")}><span className={cn("grid size-7 shrink-0 place-items-center rounded-full border font-mono text-xs", i === current && "border-primary bg-primary text-primary-foreground")}>
             {i < current ? <Check className="size-3" /> : i + 1}
           </span>{label}</li>;
@@ -179,15 +179,16 @@ function Workspace() {
 
       {b && reviewing && !run.isPending && (
         <motion.div ref={resultRef} tabIndex={-1} initial={{ opacity: 0, y: 40, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 80 }} className="mt-6 scroll-mt-20 space-y-6 outline-none">
-          <h2 className="text-lg font-semibold">3. Explore your breakdown</h2>
+          <h2 className="text-lg font-semibold">2. Explore your breakdown</h2>
           <BreakdownView key={b.title + text} b={b} onRestart={()=>{setCodeAttempt(undefined);setPracticeStatus("untried");setReviewPlan(undefined);setConfidence(3);}} onIntuition={setIntuition} codeAttempt={codeAttempt} onCodeSave={setCodeAttempt} audioUrl={audioUrl} onReviewed={result=>{setPracticeStatus(reviewOutcome(result.verdict));setReviewPlan(createReviewPlan());}} logControls={<>           <div className="surface flex flex-wrap items-center gap-4 p-4">
-            <span className="text-sm font-medium">Log this problem</span>
+            <span className="text-sm font-medium">Problem difficulty</span>
             <Select value={difficulty} onValueChange={setDifficulty}>
-              <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+              <SelectTrigger aria-label="Problem difficulty" className="w-32"><SelectValue /></SelectTrigger>
               <SelectContent>{DIFFICULTIES.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
             </Select>
           </div>
-          <ReviewTracker status={practiceStatus} review={reviewPlan} onChange={(status, plan) => { setPracticeStatus(status); setConfidence(status==='solved'?4:2);setReviewPlan(plan); }} />
+          <div className="flex flex-wrap items-center gap-3 py-4"><span className="text-sm font-medium">Your confidence · 1 low, 5 high</span><ConfidencePicker value={confidence} onChange={setConfidence} /></div>
+          <ReviewTracker status={practiceStatus} review={reviewPlan} onChange={(status, plan) => { setPracticeStatus(status); setReviewPlan(plan); }} />
           <Button className="mt-4" onClick={() => save.mutate()} disabled={save.isPending || practiceStatus==='untried'}><Save className="size-4" /> Save this outcome</Button>
  </>} />
         </motion.div>

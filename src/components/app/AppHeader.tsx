@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Compass, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,7 @@ export function Logo() {
 }
 
 export function AppHeader() {
+  const savedPage=useRouterState({select:state=>state.location.pathname.startsWith("/problems/")});
   const link = "rounded-full px-2 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground sm:px-4 sm:text-sm";
   const active = { className: "bg-foreground !text-background hover:bg-foreground" };
   return (
@@ -41,7 +42,7 @@ export function AppHeader() {
         <Logo />
         <nav className="flex items-center gap-1">
           <Link to="/workspace" className={link} activeProps={active}>Workspace</Link>
-          <Link to="/dashboard" className={link} activeProps={active}>Dashboard</Link>
+          <Link to="/dashboard" className={savedPage?`${link} ${active.className}`:link} activeProps={active}>Dashboard</Link>
         </nav>
         <div className="ml-auto shrink-0"><ThemeToggle /></div>
       </div>

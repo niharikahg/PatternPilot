@@ -98,7 +98,7 @@ export function StoryMode({ story, onAnswer, allowEnding = true, audioUrl }: { s
           <DialogTitle className="font-display text-xl">{story.title}</DialogTitle>
           <DialogDescription className="mt-1">{CHAPTERS[i] ?? `Chapter ${i + 1}`} · {i + 1} / {story.scenes.length}</DialogDescription>
         </div>
-        <div className="relative h-64 overflow-hidden border-b bg-primary-soft sm:h-96">
+        <div className="relative h-[min(30dvh,24rem)] min-h-32 overflow-hidden border-b bg-primary-soft">
           <div className="absolute inset-x-0 bottom-0 h-12 border-t border-primary/20 bg-background/60" />
           <span className="absolute left-4 top-4 font-mono text-xs text-primary">CHAPTER {String(i + 1).padStart(2, "0")}</span>
           {scene.actors.map((a) => <motion.div key={a.id} initial={false}
@@ -112,7 +112,7 @@ export function StoryMode({ story, onAnswer, allowEnding = true, audioUrl }: { s
         <div className="space-y-4 p-5">
           <p className="min-h-20 text-base leading-relaxed">{scene.caption}</p>
           {error && <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground"><p className="flex-1">{error}</p><Button variant="outline" size="sm" onClick={() => { setSrc(null); setError(""); setPlaying(true); }}>Watch with captions</Button></div>}
-          <div className="flex flex-wrap items-center gap-2 border-t pt-3">
+          <div className="sticky bottom-0 z-10 flex flex-wrap items-center gap-2 border-t bg-background py-3">
             <Button variant="ghost" size="icon" aria-label="Previous chapter" disabled={i === 0 || loading} onClick={() => jump(i - 1)}><SkipBack className="size-4" /></Button>
             <Button size="icon" aria-label={playing ? "Pause story" : "Play story"} disabled={loading} onClick={() => { if (finished) jump(0); setPlaying(!playing); }}><span>{playing ? <Pause className="size-4" /> : <Play className="size-4" />}</span></Button>
             <Button variant="ghost" size="icon" aria-label="Next chapter" disabled={i >= limit - 1 || loading} onClick={() => jump(i + 1)}><SkipForward className="size-4" /></Button>
