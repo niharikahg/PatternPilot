@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { PATTERNS, type Breakdown } from "./types";
+import { GROWTH } from "./game";
 
 const str = { type: "string" } as const;
 const strArr = { type: "array", items: str } as const;
@@ -31,6 +32,26 @@ const schema = obj({
   }),
   solution: obj({ python: str, java: str, javascript: str }),
   complexity: obj({ time: str, space: str, explanation: str, follow_ups: strArr }),
+  story: obj({
+    title: str,
+    scenes: {
+      type: "array",
+      items: obj({
+        caption: str,
+        actors: {
+          type: "array",
+          items: obj({ id: str, label: str, emoji: str, x: { type: "number" }, y: { type: "number" }, state: { type: "string", enum: ["idle", "active", "done", "faded"] } }),
+        },
+        question: { anyOf: [{ type: "null" }, obj({ prompt: str, options: strArr, answer: { type: "integer" }, hint: str })] },
+      }),
+    },
+  }),
+  complexity_lab: obj({
+    brute_force_time: { type: "string", enum: [...GROWTH] },
+    optimized_time: { type: "string", enum: [...GROWTH] },
+    optimized_space: { type: "string", enum: [...GROWTH] },
+    code_hotspots: { type: "array", items: obj({ line: { type: "integer" }, runs: str, why: str }) },
+  }),
   visualization: obj({
     kind: { type: "string", enum: ["array", "string", "linked_list", "grid", "none"] },
     frames: {
@@ -64,6 +85,10 @@ Rules:
   For grid: put rows in "grid", leave "cells" empty, use row/col.
   "highlight" = elements being examined this step; "pointers" = named indices (e.g. i, left, prev, curr); "vars" = key variable values at that step; "note" = one sentence of what happens.
   Use kind "none" with empty frames for problems that don't fit these shapes.
+- story: retell the problem as a fun, vivid mini-story with a cast (e.g. Two Sum = a shopkeeper finding two coins worth exactly 9). 5 scenes: setup, goal, the trap (slow way), the aha (the pattern), the win.
+  Each scene has 2-8 actors (one per input item or character), each with a single emoji, short label (the value), x and y as percent positions 5-95 on a stage. Keep the same actor ids across scenes so they animate between positions; change state to show focus ("active"), finished ("done") or eliminated ("faded").
+  Captions: 1-2 short, playful sentences. Scenes 3 and 4 must include a question (3 options, answer = correct index, hint = gentle nudge); others use null.
+- complexity_lab: growth classes for brute force time, optimized time and optimized space; code_hotspots = 1-3 zero-based line numbers in the python solution that dominate cost, with runs (e.g. "n times") and why (one sentence).
 Return JSON matching the schema.`;
 
 type OutputItem = { type?: string; content?: { type?: string; text?: string }[] };

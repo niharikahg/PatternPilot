@@ -60,7 +60,7 @@ function ProblemPage() {
               <Trash2 className="h-4 w-4" /> Delete
             </Button>
           </div>
-          <BreakdownView b={q.data.breakdown} />
+          <BreakdownView b={q.data.breakdown} onIntuition={(s) => updateProblem(id, { intuition: s })} />
         </div>
       )}
     </main>

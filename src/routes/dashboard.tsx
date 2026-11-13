@@ -93,7 +93,7 @@ function Dashboard() {
                     <span className="font-medium">{r.title}</span>
                     <Badge variant="outline">{r.pattern}</Badge>
                     <Badge variant="secondary">{r.difficulty}</Badge>
-                    <span className="ml-auto font-mono text-xs text-muted-foreground">confidence {r.confidence}/5</span>
+                    <span className="ml-auto font-mono text-xs text-muted-foreground">{r.intuition !== undefined && <>intuition {r.intuition}% · </>}confidence {r.confidence}/5</span>
                     <ArrowRight className="h-4 w-4 text-muted-foreground" />
                   </Link>
                 </li>

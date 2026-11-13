@@ -38,11 +38,13 @@ function Workspace() {
   const [b, setB] = useState<Breakdown | null>(null);
   const [confidence, setConfidence] = useState(3);
   const [difficulty, setDifficulty] = useState<string>("Medium");
+  const [intuition, setIntuition] = useState<number | undefined>();
 
   const run = useMutation({
     mutationFn: (problem: string) => gen({ data: { problem } }),
     onSuccess: (r) => {
       setB(r);
+      setIntuition(undefined);
       setDifficulty(LIBRARY.find((l) => l.title === picked)?.difficulty ?? r.difficulty);
     },
     onError: (e: Error) => toast.error(e.message),
@@ -51,7 +53,7 @@ function Workspace() {
   const save = useMutation({
     mutationFn: async () => {
       if (!b) return;
-      return addProblem({ title: b.title, problem_text: text, pattern: b.pattern.name, difficulty, confidence, breakdown: b });
+      return addProblem({ title: b.title, problem_text: text, pattern: b.pattern.name, difficulty, confidence, intuition, breakdown: b });
     },
     onSuccess: (id) => {
       qc.invalidateQueries({ queryKey: ["problems"] });
@@ -115,7 +117,7 @@ function Workspace() {
               <Save className="h-4 w-4" /> Save to log
             </Button>
           </div>
-          <BreakdownView b={b} />
+          <BreakdownView b={b} onIntuition={setIntuition} />
         </div>
       )}
     </main>

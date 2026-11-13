@@ -7,6 +7,11 @@ import { cn } from "@/lib/utils";
 import type { Breakdown } from "@/lib/types";
 import { breakdownToMarkdown } from "@/lib/markdown";
 import { Visualizer } from "./Visualizer";
+import { StoryMode } from "./StoryMode";
+import { ComplexityLab } from "./ComplexityLab";
+import { celebrate } from "@/lib/confetti";
+import { intuitionScore, nextCombo } from "@/lib/game";
+import { AnimatePresence, motion } from "framer-motion";
 
 type Lang = keyof Breakdown["solution"];
 const STEPS = ["Understand", "Examples", "Pattern", "Approach", "Solution", "Complexity"] as const;
@@ -23,7 +28,20 @@ function H({ children }: { children: ReactNode }) {
   return <h4 className="mt-5 mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground first:mt-0">{children}</h4>;
 }
 
-export function BreakdownView({ b, actions }: { b: Breakdown; actions?: ReactNode }) {
+export function BreakdownView({ b, actions, onIntuition }: { b: Breakdown; actions?: ReactNode; onIntuition?: (score: number) => void }) {
+  const [combo, setCombo] = useState(0);
+  const [tally, setTally] = useState({ correct: 0, attempts: 0 });
+  const answer = (correct: boolean) => {
+    const c = nextCombo(combo, correct);
+    setCombo(c);
+    const t = { correct: tally.correct + (correct ? 1 : 0), attempts: tally.attempts + 1 };
+    setTally(t);
+    onIntuition?.(intuitionScore(t.correct, t.attempts));
+    if (correct) {
+      celebrate(c);
+      if (c >= 2) toast.success(`${c}x combo!`);
+    } else toast("Not quite. Combo reset, try the next one!");
+  };
   const [step, setStep] = useState(0);
   const [revealed, setRevealed] = useState<Record<number, boolean>>({});
   const [thinkFirst, setThinkFirst] = useState(true);
@@ -112,6 +130,7 @@ export function BreakdownView({ b, actions }: { b: Breakdown; actions?: ReactNod
         <Badge variant="secondary">{b.difficulty}</Badge>
         <Badge variant="outline">{b.pattern.name}</Badge>
         <div className="ml-auto flex flex-wrap gap-2">
+          {b.story && b.story.scenes.length > 0 && <StoryMode story={b.story} onAnswer={answer} />}
           <Button variant="outline" size="sm" onClick={() => setThinkFirst(!thinkFirst)}>
             {thinkFirst ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             Think first: {thinkFirst ? "on" : "off"}
@@ -165,7 +184,16 @@ export function BreakdownView({ b, actions }: { b: Breakdown; actions?: ReactNod
         </div>
       </div>
 
+      {b.complexity_lab && <ComplexityLab lab={b.complexity_lab} code={b.solution.python} onAnswer={answer} />}
       <Visualizer viz={b.visualization} />
+      <AnimatePresence>
+        {combo > 0 && (
+          <motion.div key={combo} initial={{ scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed bottom-5 right-5 z-50 rounded-full bg-primary px-4 py-2 font-mono text-sm font-semibold text-primary-foreground shadow-lg">
+            🔥 {combo}x combo · intuition {intuitionScore(tally.correct, tally.attempts)}%
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
