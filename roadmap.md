@@ -1,8 +1,8 @@
 # Tasks
-- [ ] Replace stacked result sections with ordered tabs and next/back navigation.
-- [ ] Verify result navigation on desktop and phone.
-- [ ] Prepare story audio before Play and add a narrated solution/data-structure ending.
-- [ ] Verify automatic preparation, immediate ready playback, and the story ending.
+- [x] Replace stacked result sections with ordered tabs and next/back navigation.
+- [x] Verify result navigation on desktop and phone.
+- [x] Prepare story audio before Play and add a narrated solution/data-structure ending.
+- [x] Verify automatic preparation, immediate ready playback, and the story ending.
 - [x] Move Complexity Lab and visual walkthrough above the flashcards.
 - [x] Add a code-writing option with speed/complexity feedback and improvement suggestions.
 - [x] Track solvable/retry problems and device-local review reminders after 1 day, 7 days, and 1 month.
