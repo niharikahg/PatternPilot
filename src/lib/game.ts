@@ -19,12 +19,16 @@ export function opsFor(g: Growth, n: number): number {
 }
 
 export function formatOps(x: number): string {
-  if (!isFinite(x) || x > 1e15) return "∞-ish";
+  if (!isFinite(x)) return "∞";
+  if (x >= 1e15) return x.toExponential(1);
+  if (x >= 1e12) return (x / 1e12).toFixed(1) + "T";
   if (x >= 1e9) return (x / 1e9).toFixed(1) + "B";
   if (x >= 1e6) return (x / 1e6).toFixed(1) + "M";
   if (x >= 1e3) return (x / 1e3).toFixed(1) + "K";
   return String(Math.round(x));
 }
+
+export function linearPercent(operations: number, slow: number) { return Math.max(0, Math.min(100, operations / Math.max(1, slow) * 100)); }
 
 /** Combo grows by 1 on a correct answer and resets to 0 on a miss. */
 export function nextCombo(combo: number, correct: boolean): number {
