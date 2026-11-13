@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      practice_progress: {
+        Row: {
+          key: string
+          updated_at: string
+          user_id: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          user_id?: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          user_id?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       problems: {
         Row: {
           breakdown: Json
