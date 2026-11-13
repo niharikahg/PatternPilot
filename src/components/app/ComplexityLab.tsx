@@ -65,7 +65,7 @@ export function ComplexityLab({ lab, code, onAnswer, mode = "full", initialBet, 
       </div>
 
       {locked && <p className="mt-3 text-sm" role="status">{bet===lab.optimized_time?'Correct':'Not quite'} — the smart way is {GROWTH_LABEL[lab.optimized_time]}. {lab.optimized_time==='n'?'Each input item needs only a bounded amount of work.':`Its dominant work grows as ${GROWTH_LABEL[lab.optimized_time]}, not ${bet?GROWTH_LABEL[bet]:'your bet'}.`}</p>}
-      </>}
+      </>
       {(mode === "reveal" || (locked && mode === "full")) && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-6 space-y-4">
           <p className="text-sm font-medium">Race the approaches</p>
