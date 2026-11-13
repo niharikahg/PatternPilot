@@ -11,6 +11,7 @@ export type SavedProblem = {
   intuition?: number | undefined;
   breakdown: Breakdown;
   created_at: string;
+  last_practiced_at?: string;
   practice_status?: PracticeStatus;
   review?: ReviewPlan | undefined;
   code_attempt?: { language: string; code: string; feedback?: string | undefined };
@@ -21,7 +22,7 @@ const KEY = "pp-problem-log";
 export function listProblems(): SavedProblem[] {
   try {
     const rows=JSON.parse(localStorage.getItem(KEY) ?? "[]") as SavedProblem[];
-    return rows.map(row=>{ const title=row.title.toLowerCase();const name:Pattern=title.includes('atoi')||title.includes('string to integer')?'String Parsing':title.includes('reverse integer')?'Math & Bit Manipulation':row.pattern==='Hash Map'?'Arrays & Hashing':row.pattern==='BFS / DFS'?'Graphs':PATTERNS.includes(row.pattern as Pattern)?row.pattern as Pattern:'Arrays & Hashing';return {...row,pattern:name,breakdown:{...row.breakdown,pattern:{...row.breakdown.pattern,name}}}; });
+    return rows.map(row=>{ const title=row.title.toLowerCase();const name:Pattern=title.includes('atoi')||title.includes('string to integer')?'String Parsing':title.includes('reverse integer')?'Math & Bit Manipulation':row.pattern==='Hash Map'?'Arrays & Hashing':row.pattern==='BFS / DFS'?'Graphs':PATTERNS.includes(row.pattern as Pattern)?row.pattern as Pattern:'Arrays & Hashing';let solved=false;try{solved=JSON.parse(row.code_attempt?.feedback??'null')?.verdict==='Looks correct';}catch{}return {...row,practice_status:solved&&(!row.practice_status||row.practice_status==='untried')?'solved':row.practice_status??'untried',pattern:name,breakdown:{...row.breakdown,pattern:{...row.breakdown.pattern,name}}}; });
   } catch {
     return [];
   }

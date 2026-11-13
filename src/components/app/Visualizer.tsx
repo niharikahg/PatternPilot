@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Breakdown } from "@/lib/types";
 
-export function Visualizer({ viz }: { viz: Breakdown["visualization"] }) {
+export function Visualizer({ viz, hideTechnique = false }: { viz: Breakdown["visualization"]; hideTechnique?: boolean }) {
   const [i, setI] = useState(0);
   if (viz.kind === "none" || !viz.frames.length) return null;
   const f = viz.frames[Math.min(i, viz.frames.length - 1)];
@@ -70,7 +70,7 @@ export function Visualizer({ viz }: { viz: Breakdown["visualization"] }) {
           </div>
         )}
       </div>
-      {f.vars.length > 0 && (
+      {!hideTechnique && f.vars.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
           {f.vars.map((v) => (
             <span key={v.name} className="rounded-md bg-muted px-2 py-1 font-mono text-xs">
@@ -79,7 +79,7 @@ export function Visualizer({ viz }: { viz: Breakdown["visualization"] }) {
           ))}
         </div>
       )}
-      <p className="mt-3 text-sm text-muted-foreground">{f.note}</p>
+      <p className="mt-3 text-sm text-muted-foreground">{hideTechnique ? 'Trace the highlighted input. What changes, and what would you remember?' : f.note}</p>
       <div className="mt-4 flex gap-2">
         <Button variant="outline" size="sm" disabled={i === 0} onClick={() => setI(i - 1)}>
           <ChevronLeft className="h-4 w-4" /> Previous

@@ -19,7 +19,7 @@ function Lane({ label, g, n, max }: { label: string; g: Growth; n: number; max: 
         <span className="font-mono">{formatOps(ops)} ops</span>
       </div>
       <div className="h-4 overflow-hidden rounded-full bg-muted">
-        <motion.div className={cn("h-full rounded-full", g === "n^2" || g === "n^3" || g === "2^n" ? "bg-destructive" : "bg-primary")} animate={{ width: `${pct}%` }} transition={{ type: "spring", stiffness: 90, damping: 15 }} />
+        <motion.div className={cn("h-full rounded-full", label === "Slow way" ? "bg-destructive" : "bg-primary")} initial={false} animate={{ width: `${pct}%` }} transition={{ duration: 0.5 }} />
       </div>
     </div>
   );
@@ -62,7 +62,7 @@ export function ComplexityLab({ lab, code, onAnswer, mode = "full", initialBet, 
         {!locked && <Button size="sm" disabled={!bet} onClick={lock}><Lock className="h-4 w-4" /> Lock it in</Button>}
       </div>
 
-      {locked && mode === "guess" && <p className="mt-3 text-sm">Bet recorded. Find out after your code attempt.</p>}
+      {locked && mode === "guess" && <p className="mt-3 text-sm" role="status">{bet===lab.optimized_time?'Correct':'Not quite'} — the smart way is {GROWTH_LABEL[lab.optimized_time]}. {lab.optimized_time==='n'?'Each input item needs only a bounded amount of work.':`Its dominant work grows as ${GROWTH_LABEL[lab.optimized_time]}, not ${bet?GROWTH_LABEL[bet]:'your bet'}.`}</p>}
       </>}
       {(mode === "reveal" || (locked && mode === "full")) && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-6 space-y-4">
