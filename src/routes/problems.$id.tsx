@@ -12,7 +12,7 @@ import { builtinAudio } from "@/lib/builtins";
 import { ReviewTracker } from "@/components/app/ReviewTracker";
 
 export const Route = createFileRoute("/problems/$id")({
-  validateSearch: (search: Record<string, unknown>) => ({ practice: search.practice === true || search.practice === "true" }),
+  validateSearch: (search: { practice?: unknown }) => ({ practice: search["practice"] === true || search["practice"] === "true" }),
   head: () => ({
     meta: [
       { title: "Saved problem — PatternPilot" },

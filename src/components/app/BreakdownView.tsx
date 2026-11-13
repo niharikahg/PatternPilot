@@ -36,7 +36,7 @@ function H({ children }: { children: ReactNode }) {
   return <h4 className="mt-5 mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground first:mt-0">{children}</h4>;
 }
 
-export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave, logControls, initialStep = "understand", sessionKey = b.title }: { b: Breakdown; actions?: ReactNode; onIntuition?: (score: number) => void; codeAttempt?: SavedProblem["code_attempt"]; onCodeSave?: (attempt: NonNullable<SavedProblem["code_attempt"]>) => void; logControls?: ReactNode; initialStep?: string; sessionKey?: string }) {
+export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave, logControls, initialStep = "understand", sessionKey = b.title, audioUrl }: { b: Breakdown; actions?: ReactNode; onIntuition?: (score: number) => void; codeAttempt?: SavedProblem["code_attempt"]; onCodeSave?: (attempt: NonNullable<SavedProblem["code_attempt"]>) => void; logControls?: ReactNode; initialStep?: string; sessionKey?: string; audioUrl?: string | undefined }) {
   const [session, setSession] = useState<PracticeSession>(() => freshSession(initialStep));
   const [ready, setReady] = useState(false);
   const [burst, setBurst] = useState(false);
@@ -154,7 +154,7 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
           <Button variant="outline" size="sm" disabled={!unlocked} onClick={copy}>
             {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />} Copy notes
           </Button>
-          {actions}
+          {session.step==='log'&&actions}
         </div>
       </div>
 
@@ -166,7 +166,7 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
         </div>
         <TabsContent value="understand" className="space-y-5 pt-4"><h3 className="font-display text-xl font-bold">Understand the problem</h3>{body[0]}<h3 className="font-display text-xl font-bold">Examples</h3>{body[1]}</TabsContent>
         <TabsContent value="guess" className="space-y-5 pt-4"><h3 className="font-display text-xl font-bold">Which pattern fits?</h3><div className="grid gap-2 sm:grid-cols-2">{patternOptions.map(option=><Button key={option} variant={session.patternGuess===option?'secondary':'outline'} disabled={Boolean(session.patternGuess)} onClick={()=>prediction('pattern',option,option===b.pattern.name)}>{option}</Button>)}</div>{session.patternGuess&&<p className="text-sm">Guess recorded. Answers stay hidden until your code attempt.</p>}{b.complexity_lab&&<ComplexityLab mode="guess" lab={b.complexity_lab} code="" initialBet={session.complexityGuess as Growth | undefined} onBet={value=>prediction('complexity',value,value===b.complexity_lab?.optimized_time)} onAnswer={()=>{}} />}</TabsContent>
-        <TabsContent forceMount value="walkthrough" className="space-y-5 pt-4 data-[state=inactive]:hidden"><Visualizer viz={b.visualization} />{playbackStory&&<StoryMode story={playbackStory} onAnswer={answer} allowEnding={unlocked} />}</TabsContent>
+        <TabsContent forceMount value="walkthrough" className="space-y-5 pt-4 data-[state=inactive]:hidden"><Visualizer viz={b.visualization} />{playbackStory&&<StoryMode story={playbackStory} onAnswer={answer} allowEnding={unlocked} audioUrl={audioUrl} />}</TabsContent>
         <TabsContent forceMount value="code" className="pt-4 data-[state=inactive]:hidden"><CodePractice problem={`${b.title}\n${b.understand.restatement}\n${b.understand.constraints.join('; ')}`} attempt={codeAttempt} onSave={onCodeSave??(()=>{})} onSubmitted={()=>setSession(prev=>({...prev,submitted:true}))} onReviewed={result=>{ if(result.verdict==='Looks correct') {setSession(prev=>award(prev,'code',true)); setBurst(true);recordPracticeDay();} }} /><Button variant="ghost" className="mt-3" disabled={unlocked} onClick={revealEarly}><Lock className="size-4" /> I'm stuck, reveal</Button></TabsContent>
         <TabsContent value="reveal" className="space-y-5 pt-4">
         {!unlocked&&<div className="flex flex-wrap items-center gap-3"><Lock className="size-5" /><p className="text-sm">Submit your code for review to unlock the answers.</p><Button variant="outline" onClick={revealEarly}>I'm stuck, reveal</Button></div>}
