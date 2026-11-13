@@ -34,5 +34,5 @@ import a14 from '@/assets/practice/14.mp3.asset.json';
 import a15 from '@/assets/practice/15.mp3.asset.json';
 const data=[b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,b11,b12,b13,b14,b15] as Breakdown[];
 const audio=[a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15];
-export function builtinBreakdown(text:string):Breakdown|null {const i=LIBRARY.findIndex(p=>p.text.trim()===text.trim());return data[i]??null;}
-export function builtinAudio(title:string):string|undefined {const i=data.findIndex(b=>b.title===title);return audio[i]?.url;}
+export function builtinBreakdown(text:string):Breakdown|null {const i=LIBRARY.findIndex(p=>p.text.trim()===text.trim());const b=data[i];const preset=LIBRARY[i];return b&&preset?{...b,title:preset.title}:null;}
+export function builtinAudio(title:string):string|undefined {const i=data.findIndex((b,index)=>b.title===title||LIBRARY[index]?.title===title);return audio[i]?.url;}
