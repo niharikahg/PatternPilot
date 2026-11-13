@@ -8,7 +8,7 @@ test('all sixteen presets have a full instant breakdown and narration',()=>{
   const b=builtinBreakdown(preset.text);
   expect(b?.title).toBe(preset.title);
   expect(b?.solution.python.length).toBeGreaterThan(20);
-  expect(builtinAudio(b?.title??'')).toMatch(/^https:\/\//);
+  expect(builtinAudio(b?.title??'')).toMatch(/^(https:\/\/|\/__l5e\/assets-v1\/).+\.mp3$/);
  }
 });
 test('all sixteen first bug puzzles are instant and omit runner imports',()=>{
