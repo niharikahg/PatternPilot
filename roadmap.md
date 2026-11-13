@@ -1,4 +1,9 @@
 # Current fixes
+- [ ] Improve Enter indentation and add blank function starters without exposing solutions.
+- [ ] Allow direct coding, compact practice headers, preserve complexity predictions, require chosen confidence, and save in place.
+- [ ] Unify review coaching and remove misleading incorrect-solution scores; use plain, input-focused feedback.
+- [ ] Expand instant bundled problem sets and verify practice on desktop and phone.
+- [x] Keep AI-only reviews and device-only progress as explicitly chosen for this round.
 - [x] Fix constraint-aware bug reviews, visible review progress, and editor indentation.
 - [x] Restore meaningful early guesses, continuous walkthrough explanations, and coherent complexity activities.
 - [x] Correct optimal-score controls, completion navigation, confidence entry, labels, units, and short-window story controls.

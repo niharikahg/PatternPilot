@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { Button } from '@/components/ui/button';
 
-export function ConfidencePicker({ value, onChange }: { value: number; onChange: (n: number) => void }) {
+export function ConfidencePicker({ value, onChange }: { value: number | null; onChange: (n: number) => void }) {
   return (
     <div className="inline-flex rounded-md border p-0.5" role="radiogroup" aria-label="Confidence">
       {[1, 2, 3, 4, 5].map((n) => (

@@ -6,7 +6,7 @@ test('correct optimal solution scores 100 while correct slower solutions score l
  expect(optimalityScore('Looks correct',{...assessment,time_gap:'major'})?.total).toBe(75);
 });
 test('incorrect efficient solutions cannot receive correctness credit',()=>{
- expect(optimalityScore('Needs work',assessment)).toEqual({total:50,correctness:0,time:35,space:15});
+ expect(optimalityScore('Needs work',assessment)).toBeNull();
 });
 test('uncertain assessments do not fabricate a numerical score',()=>{
  expect(optimalityScore('Unclear',assessment)).toBeNull();

@@ -7,7 +7,7 @@ export const optimalitySchema = z.object({
 });
 export type Optimality = z.infer<typeof optimalitySchema>;
 export function optimalityScore(verdict: string, assessment: Optimality) {
-  if (verdict === 'Unclear' || assessment.time_gap === 'unknown' || assessment.space_gap === 'unknown') return null;
+  if (verdict !== 'Looks correct' || assessment.time_gap === 'unknown' || assessment.space_gap === 'unknown') return null;
   const time = { optimal: 35, minor: 25, major: 10 }[assessment.time_gap];
   const space = { optimal: 15, minor: 10, major: 5 }[assessment.space_gap];
   const correctness = verdict === 'Looks correct' ? 50 : 0;
