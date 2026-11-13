@@ -1,129 +1,128 @@
-import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { Clapperboard, Pause, Play, RotateCcw } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { motion, useReducedMotion } from "framer-motion";
+import { ArrowRight, Clapperboard, Loader2, Pause, Play, RotateCcw, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import type { Story } from "@/lib/types";
+import { narrateStory } from "@/lib/story-audio.functions";
+import { sceneAtProgress, storyTimeline } from "@/lib/story-playback";
 
-function Typewriter({ text }: { text: string }) {
-  const [n, setN] = useState(0);
-  useEffect(() => {
-    setN(0);
-    const t = setInterval(() => setN((x) => (x >= text.length ? x : x + 2)), 22);
-    return () => clearInterval(t);
-  }, [text]);
-  return <>{text.slice(0, n)}</>;
-}
+const CHAPTERS = ["Once upon a problem", "The mission", "A twist in the tale", "The clever discovery", "A happy ending"];
 
 export function StoryMode({ story, onAnswer }: { story: Story; onAnswer: (correct: boolean) => void }) {
+  const narrate = useServerFn(narrateStory);
+  const reduced = useReducedMotion();
   const [open, setOpen] = useState(false);
   const [i, setI] = useState(0);
-  const [playing, setPlaying] = useState(true);
-  const [picked, setPicked] = useState<Record<number, number[]>>({});
+  const [playing, setPlaying] = useState(false);
+  const [muted, setMuted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [src, setSrc] = useState<string | null>(null);
+  const [finished, setFinished] = useState(false);
+  const [picked, setPicked] = useState<Record<number, number>>({});
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const openRef = useRef(false);
   const scene = story.scenes[i];
-  const q = scene?.question ?? null;
-  const solved = q ? (picked[i] ?? []).includes(q.answer) : true;
-  const last = i >= story.scenes.length - 1;
+  const timeline = storyTimeline(story);
 
+  useEffect(() => () => { if (src) URL.revokeObjectURL(src); }, [src]);
   useEffect(() => {
-    if (!open || !playing || !solved || last) return;
-    const t = setTimeout(() => setI((x) => x + 1), 4200);
-    return () => clearTimeout(t);
-  }, [open, playing, solved, last, i]);
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (open && playing && src) {
+      void audio.play().catch(() => { setPlaying(false); setError("Press Play to start the narration."); });
+    } else audio.pause();
+  }, [open, playing, src]);
 
-  if (!scene) return null;
-  const choose = (o: number) => {
-    if (!q || solved) return;
-    const tries = picked[i] ?? [];
-    if (tries.includes(o)) return;
-    setPicked({ ...picked, [i]: [...tries, o] });
-    if (tries.length === 0) onAnswer(o === q.answer);
+  // Captions-only playback never waits for a quiz answer.
+  useEffect(() => {
+    if (!open || !playing || src || loading || !scene || finished) return;
+    const duration = Math.max(5000, scene.caption.split(/\s+/).length * 420);
+    const timer = setTimeout(() => {
+      if (i >= story.scenes.length - 1) { setFinished(true); setPlaying(false); }
+      else setI(i + 1);
+    }, duration);
+    return () => clearTimeout(timer);
+  }, [open, playing, src, loading, scene, finished, i, story.scenes.length]);
+
+  const start = async () => {
+    openRef.current = true;
+    setOpen(true); setI(0); setFinished(false); setError("");
+    if (src) { if (audioRef.current) audioRef.current.currentTime = 0; setPlaying(true); return; }
+    setLoading(true); setPlaying(false);
+    try {
+      const result = await narrate({ data: { captions: story.scenes.map((s) => s.caption) } });
+      const bytes = Uint8Array.from(atob(result.base64), (char) => char.charCodeAt(0));
+      setSrc(URL.createObjectURL(new Blob([bytes], { type: result.contentType })));
+      if (openRef.current) setPlaying(true);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Narration is unavailable. Watch with captions instead.");
+    } finally { setLoading(false); }
   };
+  const jump = (next: number) => {
+    setI(next); setFinished(false);
+    const audio = audioRef.current;
+    if (audio && Number.isFinite(audio.duration)) audio.currentTime = (timeline[next]?.start ?? 0) * audio.duration;
+  };
+  if (!scene) return null;
 
-  return (
-    <>
-      <Button size="sm" onClick={() => { setI(0); setOpen(true); }}>
-        <Clapperboard className="h-4 w-4" /> Play the story
-      </Button>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-3xl gap-0 overflow-hidden p-0">
-          <DialogTitle className="border-b px-5 py-3 text-base">{story.title}</DialogTitle>
-          <div className="relative h-72 overflow-hidden bg-gradient-to-b from-primary-soft to-background sm:h-80">
-            {scene.actors.map((a) => (
-              <motion.div
-                key={a.id}
-                layout
-                initial={false}
-                animate={{
-                  left: `${a.x}%`, top: `${a.y}%`,
-                  scale: a.state === "active" ? 1.25 : 1,
-                  opacity: a.state === "faded" ? 0.25 : 1,
-                }}
-                transition={{ type: "spring", stiffness: 120, damping: 14 }}
-                className="absolute -translate-x-1/2 -translate-y-1/2 text-center"
-              >
-                <motion.div
-                  animate={a.state === "active" ? { y: [0, -8, 0] } : { y: 0 }}
-                  transition={{ repeat: a.state === "active" ? Infinity : 0, duration: 0.9 }}
-                  className={cn("text-4xl drop-shadow", a.state === "done" && "grayscale-0")}
-                >
-                  {a.emoji}
-                </motion.div>
-                <div className={cn("mt-1 rounded-full border bg-card px-2 font-mono text-xs", a.state === "active" && "border-primary bg-primary text-primary-foreground", a.state === "done" && "border-success text-success")}>
-                  {a.label}
-                </div>
-              </motion.div>
-            ))}
+  return <>
+    <section className="flex flex-wrap items-center gap-5 border-y border-primary/25 bg-primary-soft px-5 py-6" aria-label="Story cinema">
+      <div aria-hidden="true" className="flex items-center gap-1 text-4xl">
+        <span>🎬</span><span className="text-3xl">{story.scenes[0]?.actors[0]?.emoji ?? "✨"}</span>
+      </div>
+      <div className="min-w-0 flex-1 basis-48">
+        <span className="text-xs font-semibold uppercase text-primary">Story cinema · Narrated</span>
+        <h3 className="mt-1 font-display text-2xl font-bold">{story.title}</h3>
+      </div>
+      <Button size="lg" onClick={() => void start()} className="h-12 gap-3 rounded-full px-6 shadow-pop"><Play className="size-5" /> Watch the story <Volume2 className="size-4" /></Button>
+    </section>
+    <Dialog open={open} onOpenChange={(value) => { openRef.current = value; setOpen(value); if (!value) setPlaying(false); }}>
+      <DialogContent className="max-h-[92dvh] w-[calc(100%-1rem)] max-w-4xl gap-0 overflow-y-auto rounded-lg p-0">
+        <div className="border-b px-5 py-4 pr-12">
+          <DialogTitle className="font-display text-xl">{story.title}</DialogTitle>
+          <DialogDescription className="mt-1">{CHAPTERS[i] ?? `Chapter ${i + 1}`} · {i + 1} / {story.scenes.length}</DialogDescription>
+        </div>
+        <audio ref={audioRef} src={src ?? undefined} muted={muted} onTimeUpdate={() => {
+          const audio = audioRef.current;
+          if (audio && audio.duration > 0) setI(sceneAtProgress(story, audio.currentTime / audio.duration));
+        }} onEnded={() => { setFinished(true); setPlaying(false); }} onError={() => { setPlaying(false); setError("The audio couldn’t play. You can watch with captions instead."); }} />
+        <div className="relative h-64 overflow-hidden border-b bg-primary-soft sm:h-96">
+          <div className="absolute inset-x-0 bottom-0 h-12 border-t border-primary/20 bg-background/60" />
+          <span className="absolute left-4 top-4 font-mono text-xs text-primary">CHAPTER {String(i + 1).padStart(2, "0")}</span>
+          {scene.actors.map((a) => <motion.div key={a.id} initial={false}
+            animate={{ left: `${Math.min(85, Math.max(15, a.x))}%`, top: `${Math.min(75, Math.max(25, a.y))}%`, scale: a.state === "active" ? 1.15 : 1, opacity: a.state === "faded" ? 0.3 : 1 }}
+            transition={{ duration: reduced ? 0 : 1.5, ease: "easeInOut" }}
+            className="absolute w-24 -translate-x-1/2 -translate-y-1/2 text-center">
+            <motion.div animate={!reduced && playing && a.state === "active" ? { y: [0, -12, 0], rotate: [0, -5, 5, 0] } : { y: 0, rotate: 0 }} transition={{ repeat: Infinity, duration: 2 }} className="text-5xl sm:text-6xl">{a.emoji}</motion.div>
+            <div className={cn("mt-2 break-words rounded-md border bg-card px-1 py-1 text-xs font-medium", a.state === "active" && "border-primary text-primary", a.state === "done" && "border-success text-success")}>{a.label}</div>
+          </motion.div>)}
+          {loading && <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background/90"><Loader2 className="size-8 animate-spin text-primary" /><p className="font-medium">Warming up the narrator…</p></div>}
+        </div>
+        <div className="space-y-4 p-5">
+          <p className="min-h-20 text-base leading-relaxed">{scene.caption}</p>
+          {error && <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground"><p className="flex-1">{error}</p><Button variant="outline" size="sm" onClick={() => { setSrc(null); setError(""); setPlaying(true); }}>Watch with captions</Button></div>}
+          <div className="flex flex-wrap items-center gap-2 border-t pt-3">
+            <Button variant="ghost" size="icon" aria-label="Previous chapter" disabled={i === 0 || loading} onClick={() => jump(i - 1)}><SkipBack className="size-4" /></Button>
+            <Button size="icon" aria-label={playing ? "Pause story" : "Play story"} disabled={loading} onClick={() => { if (finished) jump(0); setPlaying(!playing); }}><span>{playing ? <Pause className="size-4" /> : <Play className="size-4" />}</span></Button>
+            <Button variant="ghost" size="icon" aria-label="Next chapter" disabled={i >= story.scenes.length - 1 || loading} onClick={() => jump(i + 1)}><SkipForward className="size-4" /></Button>
+            <div className="flex min-w-20 flex-1 gap-1">{story.scenes.map((_, index) => <span key={index} className={cn("h-1.5 flex-1 rounded-full", index <= i ? "bg-primary" : "bg-muted")} />)}</div>
+            <Button variant="ghost" size="icon" aria-label={muted ? "Unmute narration" : "Mute narration"} disabled={!src} onClick={() => setMuted(!muted)}>{muted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}</Button>
+            <Button variant="ghost" size="icon" aria-label="Replay story" disabled={loading} onClick={() => { jump(0); setPlaying(true); }}><RotateCcw className="size-4" /></Button>
           </div>
-          <div className="space-y-4 p-5">
-            <AnimatePresence mode="wait">
-              <motion.p key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="min-h-12 text-base leading-relaxed">
-                <Typewriter text={scene.caption} />
-              </motion.p>
-            </AnimatePresence>
-            {q && (
-              <div className="rounded-lg border-2 border-dashed border-primary/50 p-4">
-                <p className="text-sm font-medium">{q.prompt}</p>
-                <div className="mt-3 grid gap-2 sm:grid-cols-3">
-                  {q.options.map((o, k) => {
-                    const tried = (picked[i] ?? []).includes(k);
-                    return (
-                      <motion.button
-                        key={k}
-                        whileTap={{ scale: 0.95 }}
-                        animate={tried && k !== q.answer ? { x: [0, -6, 6, 0] } : {}}
-                        onClick={() => choose(k)}
-                        className={cn("rounded-md border px-3 py-2 text-left text-sm transition-colors hover:bg-accent",
-                          tried && k === q.answer && "border-success bg-success/15",
-                          tried && k !== q.answer && "border-destructive/60 opacity-60")}
-                      >
-                        {o}
-                      </motion.button>
-                    );
-                  })}
-                </div>
-                {!solved && (picked[i]?.length ?? 0) > 0 && <p className="mt-2 text-sm text-muted-foreground">Hint: {q.hint}</p>}
-              </div>
-            )}
-            <div className="flex items-center gap-2">
-              <div className="flex flex-1 gap-1">
-                {story.scenes.map((_, k) => (
-                  <div key={k} className={cn("h-1.5 flex-1 rounded-full", k <= i ? "bg-primary" : "bg-muted")} />
-                ))}
-              </div>
-              <Button variant="ghost" size="icon" onClick={() => setPlaying(!playing)} aria-label={playing ? "Pause" : "Play"}>
-                {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-              </Button>
-              {last ? (
-                <Button size="sm" variant="outline" onClick={() => setI(0)}><RotateCcw className="h-4 w-4" /> Replay</Button>
-              ) : (
-                <Button size="sm" disabled={!solved} onClick={() => setI(i + 1)}>Next scene</Button>
-              )}
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
-  );
+          {finished && <section className="space-y-4 border-t pt-4"><h4 className="flex items-center gap-2 font-display text-lg font-bold"><Clapperboard className="size-5" /> The end. Your turn?</h4>
+            {story.scenes.map((s, index) => s.question && <div key={index}>
+              <p className="text-sm font-medium">{s.question.prompt}</p>
+              <div className="mt-2 flex flex-wrap gap-2">{s.question.options.map((option, optionIndex) => <Button key={option} variant="outline" size="sm" disabled={picked[index] !== undefined} className={cn("h-auto whitespace-normal text-left", picked[index] === optionIndex && (optionIndex === s.question?.answer ? "border-success bg-success/15" : "border-destructive"))} onClick={() => { setPicked((prev) => ({ ...prev, [index]: optionIndex })); onAnswer(optionIndex === s.question?.answer); }}>{option}</Button>)}</div>
+              {picked[index] !== undefined && <p className="mt-2 text-sm text-muted-foreground">{s.question.options[s.question.answer]} · {s.question.hint}</p>}
+            </div>)}
+            <Button variant="ghost" onClick={() => { openRef.current = false; setOpen(false); setPlaying(false); }}>Back to the breakdown <ArrowRight className="size-4" /></Button>
+          </section>}
+        </div>
+      </DialogContent>
+    </Dialog>
+  </>;
 }
