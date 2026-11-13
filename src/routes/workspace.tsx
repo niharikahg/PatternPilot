@@ -11,7 +11,7 @@ import { BreakdownView } from "@/components/app/BreakdownView";
 import { ConfidencePicker } from "@/components/app/ConfidencePicker";
 import { cachedBreakdown, cacheBreakdown } from "@/lib/breakdown-cache";
 import { builtinBreakdown, builtinAudio } from "@/lib/builtins";
-import { narrateStory } from "@/lib/story-audio.functions";
+import { prepareNarration } from "@/lib/narration-cache";
 import { storyWithEnding } from "@/lib/story-ending";
 import { LIBRARY } from "@/lib/library";
 import { DIFFICULTIES, type Breakdown } from "@/lib/types";
@@ -39,7 +39,7 @@ export const Route = createFileRoute("/workspace")({
 });
 
 function Workspace() {
-  const narrate = useServerFn(narrateStory);
+
   const [earlySections,setEarlySections] = useState<Partial<Breakdown>>({});
   const [audioUrl,setAudioUrl] = useState<string | undefined>();
   const [restored,setRestored] = useState(false);
@@ -72,7 +72,7 @@ function Workspace() {
   const prepareAudio = (value: Breakdown) => {
     const built=builtinAudio(value.title); if(built){setAudioUrl(built);return;}
     const story=storyWithEnding(value); if(!story)return;
-    void narrate({data:{captions:story.scenes.map(s=>s.caption)}}).then(result=>{const bytes=Uint8Array.from(atob(result.base64),c=>c.charCodeAt(0));setAudioUrl(URL.createObjectURL(new Blob([bytes],{type:result.contentType})));}).catch(()=>{});
+    void prepareNarration(story.scenes.map(s=>s.caption)).then(setAudioUrl).catch(()=>{});
   };
   const run = useMutation({
     mutationFn: async (problem: string) => {

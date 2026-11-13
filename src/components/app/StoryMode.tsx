@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import type { Story } from "@/lib/types";
-import { narrateStory } from "@/lib/story-audio.functions";
+import { prepareNarration } from "@/lib/narration-cache";
 import { sceneAtProgress, storyTimeline } from "@/lib/story-playback";
 
 const CHAPTERS = ["Once upon a problem", "The mission", "A twist in the tale", "The clever discovery", "A happy ending", "From story to solution"];
 
 export function StoryMode({ story, onAnswer, allowEnding = true, audioUrl }: { story: Story; onAnswer: (correct: boolean) => void; allowEnding?: boolean; audioUrl?: string | undefined }) {
-  const narrate = useServerFn(narrateStory);
+
   const reduced = useReducedMotion();
   const [open, setOpen] = useState(false);
   const [i, setI] = useState(0);
@@ -30,7 +30,7 @@ export function StoryMode({ story, onAnswer, allowEnding = true, audioUrl }: { s
   const timeline = storyTimeline(story);
   const limit = allowEnding ? story.scenes.length : Math.min(3, story.scenes.length);
 
-  useEffect(() => () => { if (src) URL.revokeObjectURL(src); }, [src]);
+
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -55,9 +55,7 @@ export function StoryMode({ story, onAnswer, allowEnding = true, audioUrl }: { s
     preparingRef.current = true;
     setLoading(true); setPlaying(false);
     try {
-      const result = await narrate({ data: { captions: story.scenes.map((s) => s.caption) } });
-      const bytes = Uint8Array.from(atob(result.base64), (char) => char.charCodeAt(0));
-      setSrc(URL.createObjectURL(new Blob([bytes], { type: result.contentType })));
+      setSrc(await prepareNarration(story.scenes.map(s=>s.caption)));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Narration is unavailable. Watch with captions instead.");
     } finally { setLoading(false); }
