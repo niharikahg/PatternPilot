@@ -5,7 +5,7 @@ let fallbackSeen: number[] = [];
 export function drawWaitingQuestion(count: number, storage?: Pick<Storage, "getItem" | "setItem">, random = Math.random): number | null {
   let seen = fallbackSeen;
   try {
-    const parsed: unknown = JSON.parse(storage?.getItem(KEY) ?? "[]");
+    const parsed: unknown = storage ? JSON.parse(storage.getItem(KEY) ?? "[]") : fallbackSeen;
     if (Array.isArray(parsed)) seen = parsed.filter((x): x is number => Number.isInteger(x) && x >= 0 && x < count);
   } catch { /* Storage may be unavailable; keep the in-memory history. */ }
   const remaining = Array.from({ length: count }, (_, i) => i).filter((i) => !seen.includes(i));
