@@ -37,3 +37,6 @@ use the editor.
 - Waiting questions use a device-local history of displayed question indices and random sampling without replacement; stop questions when the local bank is exhausted instead of recycling them.
 - Render the six breakdown sections as shared preview flashcards opening scrollable detail dialogs, so workspace and saved problems remain consistent.
 - Keep workspace onboarding device-local and separate input/waiting from the review state; guide dismissal must not require an account or send extra requests.
+- Story narration is generated only when requested through a public server function and cached in player memory; continuous audio drives approximate word-weighted scene transitions, with optional questions after the film rather than blocking playback.
+- Code submissions receive static AI correctness and complexity analysis, never execution or fabricated timing; drafts and feedback are stored with device-local saved problems.
+- Spaced reviews are device-local schedules anchored to the flag date at one day, seven days, and one calendar month; completion advances the queue without silently discarding overdue reviews.
