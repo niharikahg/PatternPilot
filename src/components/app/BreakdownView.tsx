@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { ArrowLeft, ArrowRight, ArrowUpRight, BookOpen, Check, Code2, Copy, Gauge, Layers, ListChecks, Workflow, Play, FlaskConical, Lock } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, BookOpen, Check, X, Bug, Code2, Copy, Gauge, Layers, ListChecks, Workflow, Play, FlaskConical, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { PATTERNS, type Breakdown } from "@/lib/types";
 import { breakdownToMarkdown } from "@/lib/markdown";
 import { patternVerdict, reviewOutcome } from "@/lib/guess-feedback";
+import { guessState } from "@/lib/guess-state";
 import type { CodeFeedback } from "@/lib/code-review.functions";
 import { BugPractice } from "./BugPractice";
 import { Visualizer } from "./Visualizer";
@@ -54,12 +55,13 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
     { id: "guess", label: "Guess", icon: FlaskConical },
     { id: "walkthrough", label: "Walkthrough", icon: Play },
     { id: "code", label: "Your code", icon: Code2 },
+    { id: "bug", label: "Spot the bug", icon: Bug },
     { id: "reveal", label: "Reveal", icon: Layers },
     { id: "log", label: "Log it", icon: Check },
   ];
   const activeIndex = views.findIndex((view) => view.id === session.step);
   const guessed = Boolean(session.patternGuess && session.complexityGuess);
-  const switchView = (value: string) => { if(["walkthrough","code","reveal","log"].includes(value) && !guessed) return; setSession(prev=>({...prev,step:value})); navigationRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); };
+  const switchView = (value: string) => { if(["walkthrough","code","bug","reveal","log"].includes(value) && !guessed) return; setSession(prev=>({...prev,step:value})); navigationRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); };
   const answer = (correct: boolean) => { setSession(prev=>({...prev, correct:prev.correct+(correct?1:0), attempts:prev.attempts+1, combo:correct?prev.combo+1:0})); setBurst(true); if(correct) celebrate(1); };
   const prediction = (key:string, value:string, correct:boolean) => { setSession(prev=>({...award(prev,key,correct), ...(key==='pattern'?{patternGuess:value}:{complexityGuess:value})})); setBurst(true); recordPracticeDay(); };
   const revealEarly = () => { if(!window.confirm("Are you sure? Revealing now lowers your intuition score and code XP.")) return; setSession(prev=>earlyReveal(prev)); setBurst(true); };
@@ -163,14 +165,15 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
 
       <Tabs value={session.step} onValueChange={switchView}>
         <div ref={navigationRef} className="sticky top-16 z-20 scroll-mt-16 border-y bg-background py-3">
-          <TabsList aria-label="Problem activities" className="grid h-auto w-full grid-cols-3 gap-1 bg-transparent p-0 sm:grid-cols-6">
+          <TabsList aria-label="Problem activities" className="grid h-auto w-full grid-cols-4 gap-1 bg-transparent p-0 lg:grid-cols-7">
             {views.map(({ id, label, icon: Icon }, index) => <TabsTrigger key={id} value={id} disabled={index>1&&!guessed} className="flex min-h-12 flex-col gap-1 px-1 py-2 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground sm:flex-row sm:gap-2 sm:text-sm"><Icon className="size-4 shrink-0" /><span>{index + 1}. {label}</span></TabsTrigger>)}
           </TabsList>
         </div>
         <TabsContent value="understand" className="space-y-5 pt-4"><h3 className="font-display text-xl font-bold">Understand the problem</h3>{body[0]}<h3 className="font-display text-xl font-bold">Examples</h3>{body[1]}</TabsContent>
-        <TabsContent value="guess" className="space-y-5 pt-4"><h3 className="font-display text-xl font-bold">Which pattern fits?</h3><div className="grid gap-2 sm:grid-cols-2">{patternOptions.map(option=><Button key={option} variant={session.patternGuess===option?'secondary':'outline'} aria-pressed={session.patternGuess===option} className={cn('h-auto min-h-12 whitespace-normal',session.patternGuess===option&&'border-primary bg-primary-soft ring-2 ring-primary disabled:opacity-100')} disabled={Boolean(session.patternGuess)} onClick={()=>prediction('pattern',option,option===b.pattern.name)}>{session.patternGuess===option&&<Check className="size-4" />}{option}</Button>)}</div>{session.patternGuess&&<p role="status" className="text-sm">{patternVerdict(b,session.patternGuess)}</p>}{b.complexity_lab&&<ComplexityLab mode="guess" lab={b.complexity_lab} code="" initialBet={session.complexityGuess as Growth | undefined} onBet={value=>prediction('complexity',value,value===b.complexity_lab?.optimized_time)} onAnswer={()=>{}} />}</TabsContent>
+        <TabsContent value="guess" className="space-y-5 pt-4"><h3 className="font-display text-xl font-bold">Which pattern fits?</h3><div className="grid gap-2 sm:grid-cols-2">{patternOptions.map(option=>{const state=guessState(option,session.patternGuess,b.pattern.name);return <Button key={option} variant="outline" aria-pressed={session.patternGuess===option} className={cn('h-auto min-h-12 whitespace-normal disabled:opacity-100',state==='correct'&&'border-success bg-success/15 text-success ring-2 ring-success',state==='wrong'&&'border-destructive bg-destructive/10 text-destructive ring-2 ring-destructive')} disabled={Boolean(session.patternGuess)} onClick={()=>prediction('pattern',option,option===b.pattern.name)}>{state==='correct'&&<Check className="size-4" />}{state==='wrong'&&<X className="size-4" />}{option}</Button>;})}</div>{session.patternGuess&&<p role="status" className={cn('text-sm',session.patternGuess===b.pattern.name?'text-success':'text-destructive')}>{patternVerdict(b,session.patternGuess)}</p>}{b.complexity_lab&&<ComplexityLab mode="guess" lab={b.complexity_lab} code="" initialBet={session.complexityGuess as Growth | undefined} onBet={value=>prediction('complexity',value,value===b.complexity_lab?.optimized_time)} onAnswer={()=>{}} />}</TabsContent>
         <TabsContent forceMount value="walkthrough" className="space-y-5 pt-4 data-[state=inactive]:hidden"><Visualizer viz={b.visualization} hideTechnique={!unlocked} />{playbackStory&&<StoryMode story={playbackStory} onAnswer={answer} allowEnding={unlocked} audioUrl={audioUrl} />}</TabsContent>
         <TabsContent forceMount value="code" className="pt-4 data-[state=inactive]:hidden"><CodePractice problem={`${b.title}\n${b.understand.restatement}\n${b.understand.constraints.join('; ')}`} attempt={codeAttempt} onSave={onCodeSave??(()=>{})} onSubmitted={()=>setSession(prev=>({...prev,submitted:true}))} onReviewed={result=>{ onReviewed?.(result); if(result.verdict==='Looks correct') {setSession(prev=>award(prev,'code',true)); setBurst(true);recordPracticeDay();} }} /><Button variant="ghost" className="mt-3" disabled={unlocked} onClick={revealEarly}><Lock className="size-4" /> I'm stuck, reveal</Button></TabsContent>
+        <TabsContent forceMount value="bug" className="pt-4 data-[state=inactive]:hidden"><BugPractice problem={b.understand.restatement} title={b.title} sessionKey={sessionKey} /></TabsContent>
         <TabsContent value="reveal" className="space-y-5 pt-4">
         {!unlocked&&<div className="flex flex-wrap items-center gap-3"><Lock className="size-5" /><p className="text-sm">Submit your code for review to unlock the answers.</p><Button variant="outline" onClick={revealEarly}>I'm stuck, reveal</Button></div>}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -195,7 +198,6 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
           <div className="min-w-0">{opened === null ? null : body[opened]}</div>
         </DialogContent>
       </Dialog>
-      {unlocked&&<BugPractice problem={b.understand.restatement} /> }
       {unlocked&&b.complexity_lab&&<ComplexityLab mode="reveal" lab={b.complexity_lab} code={b.solution.python} onAnswer={answer} />}
       </TabsContent>
       <TabsContent value="log" className="pt-4">{logControls ?? actions}</TabsContent>
