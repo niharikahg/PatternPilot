@@ -15,13 +15,14 @@ export function CodePractice({ problem, attempt, onSave, onSubmitted, onReviewed
   const review = useServerFn(reviewCode);
   const editorId = useId();
   const [waitingSeconds,setWaitingSeconds] = useState(0);
-  useEffect(()=>{if(!pending)return;setWaitingSeconds(0);const timer=setInterval(()=>setWaitingSeconds(s=>s+1),1000);return()=>clearInterval(timer);},[pending]);
   const [language, setLanguage] = useState<"python" | "java" | "javascript">(attempt?.language === "java" ? "java" : attempt?.language === "javascript" ? "javascript" : "python");
   const [code, setCode] = useState(attempt?.code ?? "");
   const [feedback, setFeedback] = useState<CodeFeedback | null>(() => {
     try { return attempt?.feedback ? JSON.parse(attempt.feedback) as CodeFeedback : null; } catch { return null; }
   });
   const [pending, setPending] = useState(false);
+  useEffect(()=>{if(!pending)return;setWaitingSeconds(0);const timer=setInterval(()=>setWaitingSeconds(s=>s+1),1000);return()=>clearInterval(timer);},[pending]);
+
   const [error, setError] = useState("");
   const [hintLevel, setHintLevel] = useState(0);
   const hint = hintContent(hintLevel, feedback?.failing_input, failingInput);
