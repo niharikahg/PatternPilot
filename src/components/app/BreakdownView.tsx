@@ -133,13 +133,14 @@ export function BreakdownView({ b, actions, onIntuition }: { b: Breakdown; actio
         <Badge variant="secondary">{b.difficulty}</Badge>
         <Badge variant="outline">{b.pattern.name}</Badge>
         <div className="ml-auto flex flex-wrap gap-2">
-          {b.story && b.story.scenes.length > 0 && <StoryMode story={b.story} onAnswer={answer} />}
           <Button variant="outline" size="sm" onClick={copy}>
             {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />} Copy notes
           </Button>
           {actions}
         </div>
       </div>
+
+      {b.story && b.story.scenes.length > 0 && <StoryMode story={b.story} onAnswer={answer} />}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {STEPS.map((label, i) => {

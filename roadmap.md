@@ -1,4 +1,6 @@
 # Tasks
+- [ ] Make Story Mode prominent and replace quiz interruptions with flowing story playback.
+- [ ] Add on-demand narration and verify audio, playback controls, and phone layout.
 - [x] Add a first-visit guide, a Generate breakdown pointer, and clear input/waiting/review steps.
 - [x] Verify the guided first-use flow and mobile layout.
 - [x] Shuffle waiting questions without repeats and verify the rotation.
