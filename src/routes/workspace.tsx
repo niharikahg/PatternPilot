@@ -12,10 +12,10 @@ import { ConfidencePicker } from "@/components/app/ConfidencePicker";
 import { generateBreakdown } from "@/lib/breakdown.functions";
 import { LIBRARY } from "@/lib/library";
 import { DIFFICULTIES, type Breakdown } from "@/lib/types";
-import { supabase } from "@/integrations/supabase/client";
+import { addProblem } from "@/lib/local-log";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/_authenticated/workspace")({
+export const Route = createFileRoute("/workspace")({
   head: () => ({
     meta: [
       { title: "Workspace — PatternPilot" },
@@ -51,17 +51,11 @@ function Workspace() {
   const save = useMutation({
     mutationFn: async () => {
       if (!b) return;
-      const { data, error } = await supabase
-        .from("problems")
-        .insert({ title: b.title, problem_text: text, pattern: b.pattern.name, difficulty, confidence, breakdown: b as never })
-        .select("id")
-        .single();
-      if (error) throw error;
-      return data.id;
+      return addProblem({ title: b.title, problem_text: text, pattern: b.pattern.name, difficulty, confidence, breakdown: b });
     },
     onSuccess: (id) => {
       qc.invalidateQueries({ queryKey: ["problems"] });
-      toast.success("Saved to your problem log");
+      toast.success("Saved to your problem log on this device");
       if (id) navigate({ to: "/problems/$id", params: { id } });
     },
     onError: (e: Error) => toast.error(e.message),

@@ -3,10 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
+import { listProblems } from "@/lib/local-log";
 import { patternBreakdown, weakestPatterns } from "@/lib/stats";
 
-export const Route = createFileRoute("/_authenticated/dashboard")({
+export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
       { title: "Dashboard — PatternPilot" },
@@ -23,14 +23,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 function Dashboard() {
   const q = useQuery({
     queryKey: ["problems", "list"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("problems")
-        .select("id, title, pattern, difficulty, confidence, created_at")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
+    queryFn: async () => listProblems(),
   });
   const rows = q.data ?? [];
   const byPattern = patternBreakdown(rows);

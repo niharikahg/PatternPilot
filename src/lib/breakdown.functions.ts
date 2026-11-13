@@ -1,5 +1,4 @@
 import { createServerFn } from "@tanstack/react-start";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { PATTERNS, type Breakdown } from "./types";
 
 const str = { type: "string" } as const;
@@ -70,7 +69,6 @@ Return JSON matching the schema.`;
 type OutputItem = { type?: string; content?: { type?: string; text?: string }[] };
 
 export const generateBreakdown = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((input: { problem: string }) => {
     const problem = String(input?.problem ?? "").trim();
     if (problem.length < 10) throw new Error("Please paste a longer problem description.");

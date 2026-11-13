@@ -5,10 +5,9 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { BreakdownView } from "@/components/app/BreakdownView";
 import { ConfidencePicker } from "@/components/app/ConfidencePicker";
-import { supabase } from "@/integrations/supabase/client";
-import type { Breakdown } from "@/lib/types";
+import { deleteProblem, getProblem, updateProblem } from "@/lib/local-log";
 
-export const Route = createFileRoute("/_authenticated/problems/$id")({
+export const Route = createFileRoute("/problems/$id")({
   head: () => ({
     meta: [
       { title: "Saved problem — PatternPilot" },
@@ -30,23 +29,17 @@ function ProblemPage() {
   const q = useQuery({
     queryKey: ["problems", id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("problems").select("*").eq("id", id).single();
-      if (error) throw error;
-      return data;
+      const p = getProblem(id);
+      if (!p) throw new Error("Not found");
+      return p;
     },
   });
   const setConf = useMutation({
-    mutationFn: async (confidence: number) => {
-      const { error } = await supabase.from("problems").update({ confidence }).eq("id", id);
-      if (error) throw error;
-    },
+    mutationFn: async (confidence: number) => updateProblem(id, { confidence }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["problems"] }); toast.success("Confidence updated"); },
   });
   const del = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from("problems").delete().eq("id", id);
-      if (error) throw error;
-    },
+    mutationFn: async () => deleteProblem(id),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["problems"] }); navigate({ to: "/dashboard" }); },
   });
 
@@ -67,7 +60,7 @@ function ProblemPage() {
               <Trash2 className="h-4 w-4" /> Delete
             </Button>
           </div>
-          <BreakdownView b={q.data.breakdown as unknown as Breakdown} />
+          <BreakdownView b={q.data.breakdown} />
         </div>
       )}
     </main>

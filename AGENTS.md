@@ -30,5 +30,5 @@ use the editor.
 <!-- LOVABLE:END -->
 
 ## Architecture
-- AI breakdowns are generated in `src/lib/breakdown.functions.ts` (auth-required server fn, strict JSON schema mirroring `Breakdown` in `src/lib/types.ts`); keep the schema and type in sync so saved rows stay renderable.
-- Saved problems store the full breakdown as jsonb in `public.problems`, read/written from the browser under per-user RLS.
+- AI breakdowns are generated in `src/lib/breakdown.functions.ts` (public server fn, no sign-in, strict JSON schema mirroring `Breakdown` in `src/lib/types.ts`); keep the schema and type in sync so saved rows stay renderable.
+- The problem log lives in browser localStorage (`src/lib/local-log.ts`) so the app collects no user information; the unused `public.problems` table is kept for a possible future accounts mode.
