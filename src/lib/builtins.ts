@@ -32,7 +32,15 @@ import a12 from '@/assets/practice/12.mp3.asset.json';
 import a13 from '@/assets/practice/13.mp3.asset.json';
 import a14 from '@/assets/practice/14.mp3.asset.json';
 import a15 from '@/assets/practice/15.mp3.asset.json';
-const data=[b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,b11,b12,b13,b14,b15] as Breakdown[];
+import b16 from './practice-data/16.json';
+import b17 from './practice-data/17.json';
+import b18 from './practice-data/18.json';
+import b19 from './practice-data/19.json';
+import b20 from './practice-data/20.json';
+import b21 from './practice-data/21.json';
+import b22 from './practice-data/22.json';
+import b23 from './practice-data/23.json';
+const data=[b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,b11,b12,b13,b14,b15,b16,b17,b18,b19,b20,b21,b22,b23] as Breakdown[];
 const audio=[a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15];
 export function builtinBreakdown(text:string):Breakdown|null {const i=LIBRARY.findIndex(p=>p.text.trim()===text.trim());const b=data[i];const preset=LIBRARY[i];return b&&preset?{...b,title:preset.title}:null;}
 export function builtinAudio(title:string):string|undefined {const i=data.findIndex((b,index)=>b.title===title||LIBRARY[index]?.title===title);return audio[i]?.url;}

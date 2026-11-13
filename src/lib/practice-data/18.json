@@ -1,0 +1,118 @@
+{
+  "title": "First Unique Character",
+  "difficulty": "Easy",
+  "understand": {
+    "restatement": "Given a lowercase English string s, return the index of the first character that appears exactly once, or -1 if none exists. Empty strings are allowed.",
+    "inputs": "s = 'aabbc'",
+    "outputs": "The first unique character index, or -1.",
+    "constraints": [
+      "Given a lowercase English string s, return the index of the first character that appears exactly once, or -1 if none exists. Empty strings are allowed."
+    ],
+    "clarifying_questions": []
+  },
+  "examples": [
+    {
+      "input": "s = 'aabbc'",
+      "output": "4",
+      "explanation": "c occurs once at index 4: return 4."
+    },
+    {
+      "input": "s = 'aabb'",
+      "output": "-1",
+      "explanation": "This boundary case follows the stated input and output rules."
+    }
+  ],
+  "pattern": {
+    "name": "Arrays & Hashing",
+    "why": "Count all letters once, then scan the original string in order for the first count of one. The fixed alphabet bounds additional storage to 26 counts.",
+    "recognize": "Count all letters once, then scan the original string in order for the first count of one. The fixed alphabet bounds additional storage to 26 counts."
+  },
+  "approach": {
+    "brute_force": "For each character, scan the entire string to count its occurrences.",
+    "brute_force_pseudocode": "For each character, scan the entire string to count its occurrences.",
+    "optimized": "Count all letters once, then scan the original string in order for the first count of one. The fixed alphabet bounds additional storage to 26 counts.",
+    "optimized_pseudocode": "Count all letters once, then scan the original string in order for the first count of one. The fixed alphabet bounds additional storage to 26 counts."
+  },
+  "solution": {
+    "python": "def first_unique(s):\n    counts = {}\n    for char in s:\n        counts[char] = counts.get(char, 0) + 1\n    for index, char in enumerate(s):\n        if counts[char] == 1:\n            return index\n    return -1",
+    "java": "class Solution {\n    public int firstUnique(String s) {\n        int[] counts = new int[26];\n        for (int i = 0; i < s.length(); i++) counts[s.charAt(i) - 'a']++;\n        for (int i = 0; i < s.length(); i++) {\n            if (counts[s.charAt(i) - 'a'] == 1) return i;\n        }\n        return -1;\n    }\n}",
+    "javascript": "function firstUnique(s) {\n    const counts = new Map();\n    for (const char of s) counts.set(char, (counts.get(char) || 0) + 1);\n    for (let i = 0; i < s.length; i++) {\n        if (counts.get(s[i]) === 1) return i;\n    }\n    return -1;\n}"
+  },
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)",
+    "explanation": "Count all letters once, then scan the original string in order for the first count of one. The fixed alphabet bounds additional storage to 26 counts. Time is O(n); additional storage is O(1).",
+    "follow_ups": [
+      "Which boundary inputs would you check before submitting?"
+    ]
+  },
+  "complexity_lab": {
+    "brute_force_time": "n2",
+    "optimized_time": "n",
+    "optimized_space": "1",
+    "code_hotspots": [
+      {
+        "line": 2,
+        "runs": "O(n)",
+        "why": "This loop performs the main input-dependent work."
+      }
+    ]
+  },
+  "visualization": {
+    "kind": "string",
+    "frames": [
+      {
+        "cells": [
+          "a",
+          "a",
+          "b",
+          "b",
+          "c"
+        ],
+        "grid": [],
+        "highlight": [],
+        "pointers": [],
+        "vars": [],
+        "note": "Count how often every character occurs."
+      },
+      {
+        "cells": [
+          "a",
+          "a",
+          "b",
+          "b",
+          "c"
+        ],
+        "grid": [],
+        "highlight": [
+          {
+            "row": 0,
+            "col": 4
+          }
+        ],
+        "pointers": [],
+        "vars": [],
+        "note": "a and b each occur twice, so skip them."
+      },
+      {
+        "cells": [
+          "a",
+          "a",
+          "b",
+          "b",
+          "c"
+        ],
+        "grid": [],
+        "highlight": [
+          {
+            "row": 0,
+            "col": 4
+          }
+        ],
+        "pointers": [],
+        "vars": [],
+        "note": "c occurs once at index 4: return 4."
+      }
+    ]
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "title": "Contains Duplicate",
+  "difficulty": "Easy",
+  "understand": {
+    "restatement": "Given an integer array nums, return true if any value appears more than once; otherwise return false. Empty arrays are allowed.",
+    "inputs": "nums = [1, 2, 1]",
+    "outputs": "A boolean indicating whether any value is repeated.",
+    "constraints": [
+      "Given an integer array nums, return true if any value appears more than once; otherwise return false. Empty arrays are allowed."
+    ],
+    "clarifying_questions": []
+  },
+  "examples": [
+    {
+      "input": "nums = [1, 2, 1]",
+      "output": "True",
+      "explanation": "The next 1 was already recorded: return True."
+    },
+    {
+      "input": "nums = []",
+      "output": "False",
+      "explanation": "This boundary case follows the stated input and output rules."
+    }
+  ],
+  "pattern": {
+    "name": "Arrays & Hashing",
+    "why": "Keep a set of values already encountered. Before inserting the current value, check whether it is already present.",
+    "recognize": "Keep a set of values already encountered. Before inserting the current value, check whether it is already present."
+  },
+  "approach": {
+    "brute_force": "Compare every pair of positions; return true when two values match.",
+    "brute_force_pseudocode": "Compare every pair of positions; return true when two values match.",
+    "optimized": "Keep a set of values already encountered. Before inserting the current value, check whether it is already present.",
+    "optimized_pseudocode": "Keep a set of values already encountered. Before inserting the current value, check whether it is already present."
+  },
+  "solution": {
+    "python": "def contains_duplicate(nums):\n    seen = set()\n    for value in nums:\n        if value in seen:\n            return True\n        seen.add(value)\n    return False",
+    "java": "class Solution {\n    public boolean containsDuplicate(int[] nums) {\n        java.util.HashSet<Integer> seen = new java.util.HashSet<>();\n        for (int value : nums) {\n            if (!seen.add(value)) return true;\n        }\n        return false;\n    }\n}",
+    "javascript": "function containsDuplicate(nums) {\n    const seen = new Set();\n    for (const value of nums) {\n        if (seen.has(value)) return true;\n        seen.add(value);\n    }\n    return false;\n}"
+  },
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(n)",
+    "explanation": "Keep a set of values already encountered. Before inserting the current value, check whether it is already present. Time is O(n); additional storage is O(n).",
+    "follow_ups": [
+      "Which boundary inputs would you check before submitting?"
+    ]
+  },
+  "complexity_lab": {
+    "brute_force_time": "n2",
+    "optimized_time": "n",
+    "optimized_space": "n",
+    "code_hotspots": [
+      {
+        "line": 2,
+        "runs": "O(n)",
+        "why": "This loop performs the main input-dependent work."
+      }
+    ]
+  },
+  "visualization": {
+    "kind": "array",
+    "frames": [
+      {
+        "cells": [
+          "1",
+          "2",
+          "1"
+        ],
+        "grid": [],
+        "highlight": [],
+        "pointers": [],
+        "vars": [],
+        "note": "No values checked yet."
+      },
+      {
+        "cells": [
+          "1",
+          "2",
+          "1"
+        ],
+        "grid": [],
+        "highlight": [
+          {
+            "row": 0,
+            "col": 2
+          }
+        ],
+        "pointers": [],
+        "vars": [],
+        "note": "Remember 1 and 2 as each appears for the first time."
+      },
+      {
+        "cells": [
+          "1",
+          "2",
+          "1"
+        ],
+        "grid": [],
+        "highlight": [
+          {
+            "row": 0,
+            "col": 2
+          }
+        ],
+        "pointers": [],
+        "vars": [],
+        "note": "The next 1 was already recorded: return True."
+      }
+    ]
+  }
+}

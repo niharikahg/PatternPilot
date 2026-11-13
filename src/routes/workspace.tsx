@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
@@ -25,6 +25,7 @@ import { motion } from "framer-motion";
 import { Ambient } from "@/components/fx/Ambient";
 import { ThinkingScene } from "@/components/fx/ThinkingScene";
 import { WorkspaceGuide } from "@/components/app/WorkspaceGuide";
+import { hasChosenConfidence } from '@/lib/confidence-choice';
 
 export const Route = createFileRoute("/workspace")({
   head: () => ({
@@ -46,11 +47,10 @@ function Workspace() {
   const [audioUrl,setAudioUrl] = useState<string | undefined>();
   const [restored,setRestored] = useState(false);
   const qc = useQueryClient();
-  const navigate = useNavigate();
   const [text, setText] = useState("");
   const [picked, setPicked] = useState<string | null>(null);
   const [b, setB] = useState<Breakdown | null>(null);
-  const [confidence, setConfidence] = useState(3);
+  const [confidence, setConfidence] = useState<number | null>(null);
   const [difficulty, setDifficulty] = useState<string>("Medium");
   const [intuition, setIntuition] = useState<number | undefined>();
   const [reviewing, setReviewing] = useState(false);
@@ -61,7 +61,7 @@ function Workspace() {
   const resultRef = useRef<HTMLDivElement>(null);
   const stage = reviewing ? 1 : 0;
 
-  useEffect(()=>{try{const saved=JSON.parse(localStorage.getItem('pp-workspace')??'null');if(saved){setText(saved.text??'');setPicked(saved.picked??null);setB(saved.b??null);setReviewing(Boolean(saved.b));setCodeAttempt(saved.codeAttempt);setConfidence(saved.confidence??3);setDifficulty(saved.difficulty??'Medium');setPracticeStatus(saved.practiceStatus??'untried');setReviewPlan(saved.reviewPlan);if(saved.b)prepareAudio(saved.b);}}catch{}setRestored(true);},[]);
+  useEffect(()=>{try{const saved=JSON.parse(localStorage.getItem('pp-workspace')??'null');if(saved){setText(saved.text??'');setPicked(saved.picked??null);setB(saved.b??null);setReviewing(Boolean(saved.b));setCodeAttempt(saved.codeAttempt);setConfidence(saved.confidence??null);setDifficulty(saved.difficulty??'Medium');setPracticeStatus(saved.practiceStatus??'untried');setReviewPlan(saved.reviewPlan);if(saved.b)prepareAudio(saved.b);}}catch{}setRestored(true);},[]);
   useEffect(()=>{if(restored)try{localStorage.setItem('pp-workspace',JSON.stringify({text,picked,b:reviewing?b:null,codeAttempt,confidence,difficulty,practiceStatus,reviewPlan}));}catch{}},[restored,text,picked,b,reviewing,codeAttempt,confidence,difficulty,practiceStatus,reviewPlan]);
 
   const pickProblem = (title: string, problem: string) => {
@@ -91,7 +91,7 @@ function Workspace() {
       setB(r);
       setPracticeStatus("untried"); setReviewPlan(undefined); setCodeAttempt(undefined);
       setReviewing(true);
-      setIntuition(undefined);
+      setIntuition(undefined); setConfidence(null);
       setDifficulty(LIBRARY.find((l) => l.title === picked)?.difficulty ?? r.difficulty);
       requestAnimationFrame(() => { resultRef.current?.focus(); resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); });
     },
@@ -100,13 +100,13 @@ function Workspace() {
 
   const save = useMutation({
     mutationFn: async () => {
-      if (!b) return;
+      if (!b || !hasChosenConfidence(confidence)) throw new Error("Choose your confidence before saving.");
       return addProblem({ title: b.title, problem_text: text, pattern: b.pattern.name, difficulty, confidence, intuition, breakdown: b, practice_status: practiceStatus, review: reviewPlan, last_practiced_at: new Date().toISOString(), ...(codeAttempt ? { code_attempt: codeAttempt } : {}) });
     },
-    onSuccess: (id) => {
+    onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["problems"] });
       toast.success("Saved to your problem log on this device");
-      if (id) navigate({ to: "/problems/$id", params: { id }, search:{practice:false} });
+
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -114,10 +114,10 @@ function Workspace() {
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
       <Ambient />
-      <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-4xl font-extrabold md:text-6xl">
+      {!reviewing && <><motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-4xl font-extrabold md:text-6xl">
         What are we <span className="inline-block -rotate-2 rounded-2xl bg-highlight px-3 text-highlight-foreground">cracking</span> today?
       </motion.h1>
-      <p className="mt-2 text-muted-foreground">{reviewing ? "Your breakdown is ready. Start with Understand and Guess, then explore the walkthrough and try your code." : "Start with a practice problem below, or paste your own."}</p>
+      <p className="mt-2 text-muted-foreground">Start with a practice problem below, or paste your own.</p>
 
       <WorkspaceGuide onTryExample={() => { const example = LIBRARY.find((p) => p.title === "Two Sum"); if (example) pickProblem(example.title, example.text); }} />
       <ol aria-label="Problem progress" className="mt-5 grid grid-cols-2 border-b pb-4">
@@ -127,7 +127,7 @@ function Workspace() {
             {i < current ? <Check className="size-3" /> : i + 1}
           </span>{label}</li>;
         })}
-      </ol>
+      </ol></>}
 
       {reviewing && <Button variant="ghost" size="sm" className="mt-4" onClick={() => { setReviewing(false); requestAnimationFrame(() => inputRef.current?.focus()); }}><ArrowLeft className="size-4" /> Change problem</Button>}
 
@@ -179,8 +179,8 @@ function Workspace() {
 
       {b && reviewing && !run.isPending && (
         <motion.div ref={resultRef} tabIndex={-1} initial={{ opacity: 0, y: 40, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 80 }} className="mt-6 scroll-mt-20 space-y-6 outline-none">
-          <h2 className="text-lg font-semibold">2. Explore your breakdown</h2>
-          <BreakdownView key={b.title + text} b={b} onRestart={()=>{setCodeAttempt(undefined);setPracticeStatus("untried");setReviewPlan(undefined);setConfidence(3);}} onIntuition={setIntuition} codeAttempt={codeAttempt} onCodeSave={setCodeAttempt} audioUrl={audioUrl} onReviewed={result=>{setPracticeStatus(reviewOutcome(result.verdict));setReviewPlan(createReviewPlan());}} logControls={<>           <div className="surface flex flex-wrap items-center gap-4 p-4">
+          
+          <BreakdownView key={b.title + text} b={b} onRestart={()=>{setCodeAttempt(undefined);setPracticeStatus("untried");setReviewPlan(undefined);setConfidence(null);}} onIntuition={setIntuition} codeAttempt={codeAttempt} onCodeSave={setCodeAttempt} audioUrl={audioUrl} onReviewed={result=>{setPracticeStatus(reviewOutcome(result.verdict));setReviewPlan(createReviewPlan());}} logControls={<>           <div className="surface flex flex-wrap items-center gap-4 p-4">
             <span className="text-sm font-medium">Problem difficulty</span>
             <Select value={difficulty} onValueChange={setDifficulty}>
               <SelectTrigger aria-label="Problem difficulty" className="w-32"><SelectValue /></SelectTrigger>
@@ -189,7 +189,7 @@ function Workspace() {
           </div>
           <div className="flex flex-wrap items-center gap-3 py-4"><span className="text-sm font-medium">Your confidence · 1 low, 5 high</span><ConfidencePicker value={confidence} onChange={setConfidence} /></div>
           <ReviewTracker status={practiceStatus} review={reviewPlan} onChange={(status, plan) => { setPracticeStatus(status); setReviewPlan(plan); }} />
-          <Button className="mt-4" onClick={() => save.mutate()} disabled={save.isPending || practiceStatus==='untried'}><Save className="size-4" /> Save this outcome</Button>
+          <Button className="mt-4" onClick={() => save.mutate()} disabled={save.isPending || practiceStatus==='untried' || confidence===null}><Save className="size-4" /> Save this outcome</Button>
  </>} />
         </motion.div>
       )}

@@ -36,7 +36,7 @@ use the editor.
 - Waiting-screen questions and answer explanations stay local with the tips; interactions must not add AI requests or delay the result.
 - Waiting questions are an ongoing local procedural stream: shuffle concept families without replacement per cycle, vary each cycle's examples, and persist the cycle and remaining families on device; never stop at a finite bank or add AI latency.
 - Render the six breakdown sections as shared preview flashcards opening scrollable detail dialogs, so workspace and saved problems remain consistent.
-- Present Understand, Guess, Walkthrough, Code, a separate debugging challenge, Reveal and Log in shared ordered tabs; require predictions before walkthrough/coding while answer cards still require code submission or confirmed early reveal.
+- Present Understand, Guess, Walkthrough, Code, a separate debugging challenge, Reveal and Log in shared ordered tabs; allow learners to jump directly to coding and revisit optional activities while answer cards still require code submission or confirmed early reveal.
 - Keep workspace onboarding device-local and separate input/waiting from the review state; guide dismissal must not require an account or send extra requests.
 - Prepare story narration automatically when a breakdown is available, cache it in player memory, and preload audio before enabling narrated playback; append a solution epilogue from the breakdown so stories connect to the algorithm, data structure, and complexity without extra text-generation calls.
 - Code submissions receive static AI correctness and complexity analysis, never execution or fabricated timing; drafts and feedback are stored with device-local saved problems.
@@ -55,4 +55,9 @@ use the editor.
 - Restart only the active practice session and its drafts with remounted activity views; preserve bundled content, narration, other problems, and logged outcomes to avoid destructive resets.
 - Extend static code feedback with optional optimality evidence for legacy compatibility; calculate a transparent correctness/time/space rubric locally, show uncertainty without a number, and disclose coaching steps progressively without extra inference.
 - Pass authoritative constraints plus the debugging input/output to static reviews; never penalize excluded inputs, and label confirmed in-domain fixes without claiming executed tests.
-- Use four-space Tab insertion with unique textarea IDs, real elapsed waiting feedback, and disabled programming ligatures for trustworthy code editing.
+- Use four-space Tab insertion and indentation-preserving Enter with an extra Python level after colons with unique textarea IDs, real elapsed waiting feedback, and disabled programming ligatures for trustworthy code editing.
+
+- Derive blank language starters from solution signatures only; never expose solution bodies in the editor.
+- Show numerical optimality scores only for correct code; failed reviews use one correction/hint path to avoid contradictory feedback.
+- Require a deliberate confidence selection for new saved outcomes, save in place, and render Reveal complexity predictions as read-only recaps.
+- Bundle added problem statements, solutions, walkthroughs, and first debugging puzzles locally; keep existing narration pointers unchanged and omit story controls when no authored story exists.
