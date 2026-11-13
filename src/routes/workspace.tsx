@@ -88,14 +88,15 @@ function Workspace() {
         ))}
       </div>
 
-      <motion.div layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="surface mt-5 p-5 transition-shadow focus-within:shadow-pop">
+      <div className={cn("mt-5 grid items-start gap-6", run.isPending && "lg:grid-cols-2")} >
+      <motion.div layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="surface min-w-0 p-5 transition-shadow focus-within:shadow-pop">
         <Textarea
           value={text}
           onChange={(e) => { setText(e.target.value); setPicked(null); }}
           placeholder="Paste a coding interview problem here…"
           className="min-h-36 resize-y border-0 p-0 shadow-none focus-visible:ring-0"
         />
-        <div className="mt-3 flex items-center justify-between border-t pt-3">
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t pt-3">
           <span className="text-xs text-muted-foreground">{text.length} characters</span>
           <Button className="rounded-full px-5 shadow-pop" onClick={() => run.mutate(text)} disabled={run.isPending || text.trim().length < 10}>
             {run.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
@@ -105,6 +106,7 @@ function Workspace() {
       </motion.div>
 
       {run.isPending && <ThinkingScene />}
+      </div>
 
       {b && !run.isPending && (
         <motion.div initial={{ opacity: 0, y: 40, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 80 }} className="mt-10 space-y-6">
@@ -121,7 +123,7 @@ function Workspace() {
               <Save className="h-4 w-4" /> Save to log
             </Button>
           </div>
-          <BreakdownView b={b} onIntuition={setIntuition} />
+          <BreakdownView key={b.title + text} b={b} onIntuition={setIntuition} />
         </motion.div>
       )}
     </main>
