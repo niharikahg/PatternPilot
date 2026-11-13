@@ -154,7 +154,7 @@ export function BreakdownView({ b, actions }: { b: Breakdown; actions?: ReactNod
             <div className="flex flex-col items-center justify-center rounded-md border border-dashed py-14 text-center">
               <p className="text-sm text-muted-foreground">Take a minute to work through this step yourself.</p>
               <Button className="mt-4" size="sm" onClick={() => setRevealed({ ...revealed, [step]: true })}>
-                <Eye className="h-4 w-4" /> Reveal {STEPS[step].toLowerCase()}
+                <Eye className="h-4 w-4" /> Reveal {STEPS[step]?.toLowerCase()}
               </Button>
             </div>
           )}
