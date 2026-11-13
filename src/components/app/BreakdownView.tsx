@@ -152,7 +152,7 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
       <div className="flex flex-wrap items-center gap-3">
         <h2 className="text-xl font-semibold tracking-tight">{b.title}</h2>
         <Badge variant="secondary">{b.difficulty}</Badge>
-        <Badge variant="outline">{session.xp} XP · intuition {intuitionScore(session.correct,session.attempts)}% · {session.combo}×</Badge>
+        <Badge variant={burst ? "secondary" : "outline"} aria-live="polite">{burst ? "🔥 " : ""}{session.xp} XP · intuition {intuitionScore(session.correct,session.attempts)}% · {session.combo}×</Badge>
         <div className="ml-auto flex flex-wrap gap-2">
           <Button variant="outline" size="sm" disabled={!unlocked} onClick={copy}>
             {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />} Copy notes
@@ -206,14 +206,6 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
       </div>
       </Tabs>
 
-      <AnimatePresence>
-        {burst && (
-          <motion.div key={session.attempts} initial={{ scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ opacity: 0 }}
-            className="pointer-events-none fixed top-20 left-1/2 -translate-x-1/2 z-50 rounded-full bg-primary px-4 py-2 font-mono text-sm font-semibold text-primary-foreground shadow-lg">
-            🔥 {session.combo}× · {session.xp} XP · intuition {intuitionScore(session.correct, session.attempts)}%
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
