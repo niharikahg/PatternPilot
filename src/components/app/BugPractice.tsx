@@ -3,9 +3,10 @@ import {Bug,Loader2} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {createBugChallenge} from '@/lib/bug-practice.functions';
 import {CodePractice} from './CodePractice';
+import type {SavedProblem} from '@/lib/local-log';
 export function BugPractice({problem,title,sessionKey}:{problem:string;title:string;sessionKey:string}) {
  const [challenge,setChallenge]=useState<{code:string;failing_input:string;expected_output:string}|null>(null);
- const [attempt,setAttempt]=useState<{language:string;code:string;feedback?:string}>();
+ const [attempt,setAttempt]=useState<SavedProblem['code_attempt']>();
  const [ready,setReady]=useState(false);
  useEffect(()=>{try{const saved=JSON.parse(localStorage.getItem(`pp-bug-${sessionKey}`)??'null');if(saved){setChallenge(saved.challenge);setAttempt(saved.attempt);}}catch{}setReady(true);},[sessionKey]);
  useEffect(()=>{if(ready)try{localStorage.setItem(`pp-bug-${sessionKey}`,JSON.stringify({challenge,attempt}));}catch{}},[ready,challenge,attempt,sessionKey]);
