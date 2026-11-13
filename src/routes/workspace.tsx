@@ -46,9 +46,7 @@ function Workspace() {
   const [reviewing, setReviewing] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
-  const stage = runStage();
-
-  function runStage() { return reviewing ? 2 : 0; }
+  const stage = reviewing ? 2 : 0;
 
   const pickProblem = (title: string, problem: string) => {
     setPicked(title);
