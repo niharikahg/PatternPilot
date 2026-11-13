@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { listProblems } from "@/lib/local-log";
 import { patternBreakdown, weakestPatterns } from "@/lib/stats";
+import { useEffect, useState } from "react";
+import { dailyStreak, todaysReview } from "@/lib/practice";
 import { isReviewDue, nextReview } from "@/lib/review";
 
 export const Route = createFileRoute("/dashboard")({
@@ -27,7 +29,10 @@ function Dashboard() {
     queryKey: ["problems", "list"],
     queryFn: async () => listProblems(),
   });
+  const [streak,setStreak]=useState(0);
+  useEffect(()=>{try{setStreak(dailyStreak(JSON.parse(localStorage.getItem("pp-practice-days")??"[]")));}catch{}},[]);
   const rows = q.data ?? [];
+  const today=todaysReview(rows);
   const byPattern = patternBreakdown(rows);
   const weak = weakestPatterns(rows);
   const avg = rows.length ? rows.reduce((s, r) => s + r.confidence, 0) / rows.length : 0;
@@ -52,6 +57,7 @@ function Dashboard() {
         </div>
       ) : (
         <>
+          <section className="mt-6 flex flex-wrap items-center gap-5 border-y py-5" aria-label="Today’s review"><div><p className="font-mono text-sm">🔥 {streak} day streak</p><h2 className="font-display text-xl font-bold">Today’s review</h2><p className="mt-2">{today?.title ?? "Save a problem to begin"}</p></div>{today&&<Button asChild className="ml-auto"><Link to="/problems/$id" params={{id:today.id}} search={{practice:true}}>Try again with answers locked <ArrowRight className="size-4" /></Link></Button>}</section>
           <section className="mt-6 border-y py-5" aria-label="Review reminders">
             <h2 className="font-display text-xl font-bold">Your review reminders</h2>
             <p className="mt-1 text-sm text-muted-foreground">{rows.filter((row) => row.practice_status === "solved").length} solvable · {rows.filter((row) => row.practice_status === "retry").length} to practice again · Reminders appear here on this device.</p>

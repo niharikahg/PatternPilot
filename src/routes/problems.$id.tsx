@@ -7,9 +7,12 @@ import { Button } from "@/components/ui/button";
 import { BreakdownView } from "@/components/app/BreakdownView";
 import { ConfidencePicker } from "@/components/app/ConfidencePicker";
 import { deleteProblem, getProblem, updateProblem } from "@/lib/local-log";
+import { dayKey } from "@/lib/practice";
+import { builtinAudio } from "@/lib/builtins";
 import { ReviewTracker } from "@/components/app/ReviewTracker";
 
 export const Route = createFileRoute("/problems/$id")({
+  validateSearch: (search: Record<string, unknown>) => ({ practice: search.practice === true || search.practice === "true" }),
   head: () => ({
     meta: [
       { title: "Saved problem — PatternPilot" },
@@ -26,6 +29,7 @@ export const Route = createFileRoute("/problems/$id")({
 
 function ProblemPage() {
   const { id } = Route.useParams();
+  const { practice } = Route.useSearch();
   const qc = useQueryClient();
   const navigate = useNavigate();
   const q = useQuery({
@@ -55,7 +59,7 @@ function ProblemPage() {
       {q.error && <p className="mt-6 text-sm text-destructive">Couldn't load this problem.</p>}
       {q.data && (
         <div className="mt-6 space-y-6">
-          <div className="surface flex flex-wrap items-center gap-3 p-4 text-sm">
+          <BreakdownView initialStep={practice?"guess":"understand"} sessionKey={practice?`${id}-review-${dayKey()}`:q.data.title} audioUrl={builtinAudio(q.data.title)} logControls={<>           <div className="surface flex flex-wrap items-center gap-3 p-4 text-sm">
             <span className="text-muted-foreground">Confidence</span>
             <ConfidencePicker value={q.data.confidence} onChange={(n) => setConf.mutate(n)} />
             <span className="text-muted-foreground">· {q.data.difficulty}</span>
@@ -64,7 +68,7 @@ function ProblemPage() {
             </Button>
           </div>
           <ReviewTracker status={q.data.practice_status} review={q.data.review} onChange={(status, review) => { updateProblem(id, { practice_status: status, review }); qc.invalidateQueries({ queryKey: ["problems"] }); }} />
-          <BreakdownView b={q.data.breakdown} codeAttempt={q.data.code_attempt} onCodeSave={(attempt) => updateProblem(id, { code_attempt: attempt })} onIntuition={(s) => updateProblem(id, { intuition: s })} />
+ </>} b={q.data.breakdown} codeAttempt={q.data.code_attempt} onCodeSave={(attempt) => updateProblem(id, { code_attempt: attempt })} onIntuition={(s) => updateProblem(id, { intuition: s })} />
         </div>
       )}
     </main>

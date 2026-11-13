@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Check, Loader2, Save, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BreakdownView } from "@/components/app/BreakdownView";
 import { ConfidencePicker } from "@/components/app/ConfidencePicker";
-import { generateBreakdown } from "@/lib/breakdown.functions";
+import { cachedBreakdown, cacheBreakdown } from "@/lib/breakdown-cache";
+import { builtinBreakdown, builtinAudio } from "@/lib/builtins";
+import { narrateStory } from "@/lib/story-audio.functions";
+import { storyWithEnding } from "@/lib/story-ending";
 import { LIBRARY } from "@/lib/library";
 import { DIFFICULTIES, type Breakdown } from "@/lib/types";
 import { addProblem, type SavedProblem } from "@/lib/local-log";
@@ -36,7 +39,10 @@ export const Route = createFileRoute("/workspace")({
 });
 
 function Workspace() {
-  const gen = useServerFn(generateBreakdown);
+  const narrate = useServerFn(narrateStory);
+  const [earlySections,setEarlySections] = useState<Partial<Breakdown>>({});
+  const [audioUrl,setAudioUrl] = useState<string | undefined>();
+  const [restored,setRestored] = useState(false);
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [text, setText] = useState("");
@@ -53,6 +59,9 @@ function Workspace() {
   const resultRef = useRef<HTMLDivElement>(null);
   const stage = reviewing ? 2 : 0;
 
+  useEffect(()=>{try{const saved=JSON.parse(localStorage.getItem('pp-workspace')??'null');if(saved){setText(saved.text??'');setPicked(saved.picked??null);setB(saved.b??null);setReviewing(Boolean(saved.b));setCodeAttempt(saved.codeAttempt);setConfidence(saved.confidence??3);setDifficulty(saved.difficulty??'Medium');setPracticeStatus(saved.practiceStatus??'untried');setReviewPlan(saved.reviewPlan);if(saved.b)prepareAudio(saved.b);}}catch{}setRestored(true);},[]);
+  useEffect(()=>{if(restored)try{localStorage.setItem('pp-workspace',JSON.stringify({text,picked,b:reviewing?b:null,codeAttempt,confidence,difficulty,practiceStatus,reviewPlan}));}catch{}},[restored,text,picked,b,reviewing,codeAttempt,confidence,difficulty,practiceStatus,reviewPlan]);
+
   const pickProblem = (title: string, problem: string) => {
     setPicked(title);
     setText(problem);
@@ -60,8 +69,22 @@ function Workspace() {
     requestAnimationFrame(() => { inputRef.current?.focus(); inputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }); });
   };
 
+  const prepareAudio = (value: Breakdown) => {
+    const built=builtinAudio(value.title); if(built){setAudioUrl(built);return;}
+    const story=storyWithEnding(value); if(!story)return;
+    void narrate({data:{captions:story.scenes.map(s=>s.caption)}}).then(result=>{const bytes=Uint8Array.from(atob(result.base64),c=>c.charCodeAt(0));setAudioUrl(URL.createObjectURL(new Blob([bytes],{type:result.contentType})));}).catch(()=>{});
+  };
   const run = useMutation({
-    mutationFn: (problem: string) => gen({ data: { problem } }),
+    mutationFn: async (problem: string) => {
+      setAudioUrl(undefined); setEarlySections({});
+      const cached=builtinBreakdown(problem)??cachedBreakdown(problem);
+      if(cached){prepareAudio(cached);return cached;}
+      const response=await fetch('/api/public/breakdown',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({problem})});
+      if(!response.ok||!response.body)throw new Error('Could not start this problem. Please try again.');
+      const reader=response.body.getReader();const decoder=new TextDecoder();let buffer='';let result:Breakdown|null=null;let partial:Partial<Breakdown>={};let started=false;
+      while(true){const chunk=await reader.read();if(chunk.done)break;buffer+=decoder.decode(chunk.value,{stream:true});let end:number;while((end=buffer.indexOf('\n'))>=0){const message=JSON.parse(buffer.slice(0,end));buffer=buffer.slice(end+1);if(message.error)throw new Error(message.error);if(message.section){partial={...partial,[message.section]:message.value};setEarlySections(partial);if(partial.story&&partial.approach&&partial.pattern&&partial.complexity&&!started){started=true;prepareAudio(partial as Breakdown);}}if(message.complete)result=message.complete;}}
+      if(!result)throw new Error('The answer was interrupted. Your input is saved.');cacheBreakdown(problem,result);if(!started)prepareAudio(result);return result;
+    },
     onSuccess: (r) => {
       setB(r);
       setPracticeStatus("untried"); setReviewPlan(undefined); setCodeAttempt(undefined);
@@ -92,7 +115,7 @@ function Workspace() {
       <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-4xl font-extrabold md:text-6xl">
         What are we <span className="inline-block -rotate-2 rounded-2xl bg-highlight px-3 text-highlight-foreground">cracking</span> today?
       </motion.h1>
-      <p className="mt-2 text-muted-foreground">{reviewing ? "Your breakdown is ready. Start with Understand, or explore any card." : "Start with a practice problem below, or paste your own."}</p>
+      <p className="mt-2 text-muted-foreground">{reviewing ? "Your breakdown is ready. Start with Understand, then try your guesses before revealing answers." : "Start with a practice problem below, or paste your own."}</p>
 
       <WorkspaceGuide onTryExample={() => { const example = LIBRARY.find((p) => p.title === "Two Sum"); if (example) pickProblem(example.title, example.text); }} />
       <ol aria-label="Problem progress" className="mt-5 grid grid-cols-3 border-b pb-4">
@@ -148,13 +171,14 @@ function Workspace() {
       </motion.div>
 
       {run.isPending && <ThinkingScene />}
+      {run.isPending&&earlySections.understand&&<section className="lg:col-span-2 space-y-4 border-t pt-5"><h2 className="font-display text-xl font-bold">Understand</h2><p>{earlySections.understand.restatement}</p><p className="text-sm">Input: {earlySections.understand.inputs} · Output: {earlySections.understand.outputs}</p>{earlySections.examples&&<><h3 className="font-semibold">Examples</h3>{earlySections.examples.map((e,i)=><div key={i} className="border-b py-3"><p className="font-mono text-sm">{e.input} → {e.output}</p><p className="text-sm">{e.explanation}</p></div>)}</>}<p className="text-sm text-muted-foreground">The remaining steps are being prepared…</p></section>}
       </div>
       </>}
 
       {b && reviewing && !run.isPending && (
         <motion.div ref={resultRef} tabIndex={-1} initial={{ opacity: 0, y: 40, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 80 }} className="mt-6 scroll-mt-20 space-y-6 outline-none">
           <h2 className="text-lg font-semibold">3. Explore your breakdown</h2>
-          <div className="surface flex flex-wrap items-center gap-4 p-4">
+          <BreakdownView key={b.title + text} b={b} onIntuition={setIntuition} codeAttempt={codeAttempt} onCodeSave={setCodeAttempt} audioUrl={audioUrl} logControls={<>           <div className="surface flex flex-wrap items-center gap-4 p-4">
             <span className="text-sm font-medium">Log this problem</span>
             <Select value={difficulty} onValueChange={setDifficulty}>
               <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
@@ -169,7 +193,7 @@ function Workspace() {
           </div>
           <ReviewTracker status={practiceStatus} review={reviewPlan} onChange={(status, plan) => { setPracticeStatus(status); setReviewPlan(plan); }} />
           {reviewPlan && <p className="text-sm text-muted-foreground">Save to log to keep these review reminders on this device.</p>}
-          <BreakdownView key={b.title + text} b={b} onIntuition={setIntuition} codeAttempt={codeAttempt} onCodeSave={setCodeAttempt} />
+ </>} />
         </motion.div>
       )}
     </main>
