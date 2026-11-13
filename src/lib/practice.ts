@@ -6,7 +6,7 @@ export function freshSession(step = 'understand'): PracticeSession { return { st
 export function award(session: PracticeSession, key: string, correct: boolean): PracticeSession {
  if(session.rewards.includes(key)) return session;
  const value = key === 'code' ? 50 : 20;
- return { ...session, rewards: key==='code'&&!correct ? session.rewards : [...session.rewards,key], xp:session.xp+(correct && !session.submitted && !session.early ? value : key==='code' && correct ? (session.early ? 10 : value) : 0), correct:session.correct+(correct?1:0),attempts:session.attempts+1,combo:correct?session.combo+1:0 };
+ return { ...session, rewards: key==='code'&&!correct ? session.rewards : [...session.rewards,key], xp:session.xp+(correct && !session.early ? value : key==='code' && correct ? (session.early ? 10 : value) : 0), correct:session.correct+(correct?1:0),attempts:session.attempts+1,combo:correct?session.combo+1:0 };
 }
 export function earlyReveal(session: PracticeSession): PracticeSession { return {...session,early:true,attempts:session.attempts+1,combo:0}; }
 export function reviewBadge(verdict: string, issues: string[]) { return verdict==='Looks correct' ? 'Solved' : issues.length===1 ? 'Almost (1 bug)' : 'Needs work'; }
