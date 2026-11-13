@@ -23,8 +23,8 @@ export function ThemeToggle() {
 
 export function Logo() {
   return (
-    <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight">
-      <span className="grid h-7 w-7 place-items-center rounded-md bg-primary text-primary-foreground">
+    <Link to="/" className="flex items-center gap-2 font-display text-lg font-extrabold tracking-tight">
+      <span className="grid h-8 w-8 place-items-center rounded-xl bg-highlight text-highlight-foreground">
         <Compass className="h-4 w-4" />
       </span>
       PatternPilot
@@ -33,11 +33,11 @@ export function Logo() {
 }
 
 export function AppHeader() {
-  const link = "rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground";
-  const active = { className: "bg-accent text-foreground" };
+  const link = "rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground";
+  const active = { className: "bg-foreground text-background hover:bg-foreground hover:text-background" };
   return (
     <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4">
+      <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4">
         <Logo />
         <nav className="flex items-center gap-1">
           <Link to="/workspace" className={link} activeProps={active}>Workspace</Link>
