@@ -89,7 +89,7 @@ function Workspace() {
       </div>
 
       <div className={cn("mt-5 grid items-start gap-6", run.isPending && "lg:grid-cols-2")} >
-      <motion.div layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="surface min-w-0 p-5 transition-shadow focus-within:shadow-pop">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="surface min-w-0 p-5 transition-shadow focus-within:shadow-pop">
         <Textarea
           value={text}
           onChange={(e) => { setText(e.target.value); setPicked(null); }}

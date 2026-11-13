@@ -23,7 +23,7 @@ export function ThemeToggle() {
 
 export function Logo() {
   return (
-    <Link to="/" className="flex items-center gap-2 font-display text-lg font-extrabold tracking-tight">
+    <Link to="/" className="flex shrink-0 items-center gap-2 font-display text-base font-extrabold sm:text-lg">
       <span className="grid h-8 w-8 place-items-center rounded-xl bg-highlight text-highlight-foreground">
         <Compass className="h-4 w-4" />
       </span>
@@ -33,17 +33,17 @@ export function Logo() {
 }
 
 export function AppHeader() {
-  const link = "rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground";
+  const link = "rounded-full px-2 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground sm:px-4 sm:text-sm";
   const active = { className: "bg-foreground !text-background hover:bg-foreground" };
   return (
     <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4">
+      <div className="mx-auto flex h-16 max-w-6xl items-center gap-1 px-3 sm:gap-4 sm:px-4">
         <Logo />
         <nav className="flex items-center gap-1">
           <Link to="/workspace" className={link} activeProps={active}>Workspace</Link>
           <Link to="/dashboard" className={link} activeProps={active}>Dashboard</Link>
         </nav>
-        <div className="ml-auto"><ThemeToggle /></div>
+        <div className="ml-auto shrink-0"><ThemeToggle /></div>
       </div>
     </header>
   );
