@@ -180,7 +180,7 @@ function Workspace() {
       {b && reviewing && !run.isPending && (
         <motion.div ref={resultRef} tabIndex={-1} initial={{ opacity: 0, y: 40, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 80 }} className="mt-6 scroll-mt-20 space-y-6 outline-none">
           <h2 className="text-lg font-semibold">3. Explore your breakdown</h2>
-          <BreakdownView key={b.title + text} b={b} onIntuition={setIntuition} codeAttempt={codeAttempt} onCodeSave={setCodeAttempt} audioUrl={audioUrl} onReviewed={result=>{setPracticeStatus(reviewOutcome(result.verdict));setReviewPlan(createReviewPlan());}} logControls={<>           <div className="surface flex flex-wrap items-center gap-4 p-4">
+          <BreakdownView key={b.title + text} b={b} onRestart={()=>{setCodeAttempt(undefined);setPracticeStatus("untried");setReviewPlan(undefined);setConfidence(3);}} onIntuition={setIntuition} codeAttempt={codeAttempt} onCodeSave={setCodeAttempt} audioUrl={audioUrl} onReviewed={result=>{setPracticeStatus(reviewOutcome(result.verdict));setReviewPlan(createReviewPlan());}} logControls={<>           <div className="surface flex flex-wrap items-center gap-4 p-4">
             <span className="text-sm font-medium">Log this problem</span>
             <Select value={difficulty} onValueChange={setDifficulty}>
               <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>

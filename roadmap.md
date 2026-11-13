@@ -1,4 +1,7 @@
 # Current fixes
+- [x] Keep walkthrough explanations opt-in after submission and reveal.
+- [x] Give debugging puzzles a conceptual first hint instead of repeating their input.
+- [x] Add scoped problem restart and verify fresh guesses, drafts, and locked answers.
 - [x] Clarify bug editor and add input-only first hints before full explanations.
 - [x] Draw both string inputs and acknowledge valid slower anagram guesses.
 - [x] Update seven-step wording and verify the final guest flow.

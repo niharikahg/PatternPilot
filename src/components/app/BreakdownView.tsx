@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { ArrowLeft, ArrowRight, ArrowUpRight, BookOpen, Check, X, Bug, Code2, Copy, Gauge, Layers, ListChecks, Workflow, Play, FlaskConical, Lock } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, BookOpen, Check, X, Bug, Code2, Copy, Gauge, Layers, ListChecks, Workflow, Play, FlaskConical, Lock, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +23,7 @@ import { storyWithEnding } from "@/lib/story-ending";
 import { award, earlyReveal, freshSession, recordPracticeDay, type PracticeSession } from "@/lib/practice";
 import type { Growth } from "@/lib/game";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { restartProblem } from "@/lib/problem-restart";
 
 type Lang = keyof Breakdown["solution"];
 const STEPS = ["Understand", "Examples", "Pattern", "Approach", "Solution", "Complexity"] as const;
@@ -40,10 +41,19 @@ function H({ children }: { children: ReactNode }) {
   return <h4 className="mt-5 mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground first:mt-0">{children}</h4>;
 }
 
-export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave, logControls, initialStep = "understand", sessionKey = b.title, audioUrl, onReviewed }: { b: Breakdown; actions?: ReactNode; onIntuition?: (score: number) => void; codeAttempt?: SavedProblem["code_attempt"]; onCodeSave?: (attempt: NonNullable<SavedProblem["code_attempt"]>) => void; logControls?: ReactNode; initialStep?: string; sessionKey?: string; audioUrl?: string | undefined; onReviewed?: (feedback: CodeFeedback) => void }) {
+export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave, logControls, initialStep = "understand", sessionKey = b.title, audioUrl, onReviewed, onRestart }: { b: Breakdown; actions?: ReactNode; onIntuition?: (score: number) => void; codeAttempt?: SavedProblem["code_attempt"]; onCodeSave?: (attempt: NonNullable<SavedProblem["code_attempt"]>) => void; logControls?: ReactNode; initialStep?: string; sessionKey?: string; audioUrl?: string | undefined; onReviewed?: (feedback: CodeFeedback) => void; onRestart?: () => void }) {
   const [session, setSession] = useState<PracticeSession>(() => freshSession(initialStep));
   const [ready, setReady] = useState(false);
   const [burst, setBurst] = useState(false);
+  const [restartCount, setRestartCount] = useState(0);
+  const [freshAttempt, setFreshAttempt] = useState<SavedProblem['code_attempt']>();
+  const restart = () => {
+    if (!window.confirm('Restart this problem? Your guesses, code drafts, bug attempt, and hints will be cleared. Saved log outcomes and other problems stay unchanged.')) return;
+    try { setSession(restartProblem(localStorage, sessionKey)); } catch { setSession(freshSession()); }
+    setFreshAttempt(undefined); setRestartCount(count => count + 1); setBurst(false); setOpened(null); setLang('python');
+    onRestart?.();
+    navigationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
   const unlocked = session.submitted || session.early;
   const playbackStory = useMemo(() => audioUrl && !audioUrl.startsWith('blob:') ? b.story : storyWithEnding(b), [b,audioUrl]);
   useEffect(() => { try { const value = localStorage.getItem(`pp-flow-${sessionKey}`); if(value) setSession(JSON.parse(value)); } catch {} setReady(true); }, [sessionKey]);
@@ -156,6 +166,7 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
         <Badge variant="secondary">{b.difficulty}</Badge>
         <Badge variant={burst ? "secondary" : "outline"} aria-live="polite">{burst ? "🔥 " : ""}{session.xp} XP · intuition {intuitionScore(session.correct,session.attempts)}% · {session.combo}×</Badge>
         <div className="ml-auto flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" onClick={restart}><RotateCcw className="size-4" /> Restart this problem</Button>
           <Button variant="outline" size="sm" disabled={!unlocked} onClick={copy}>
             {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />} Copy notes
           </Button>
@@ -163,7 +174,7 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
         </div>
       </div>
 
-      <Tabs value={session.step} onValueChange={switchView}>
+      <Tabs key={restartCount} value={session.step} onValueChange={switchView}>
         <div ref={navigationRef} className="sticky top-16 z-20 scroll-mt-16 border-y bg-background py-3">
           <TabsList aria-label="Problem activities" className="grid h-auto w-full grid-cols-4 gap-1 bg-transparent p-0 lg:grid-cols-7">
             {views.map(({ id, label, icon: Icon }, index) => <TabsTrigger key={id} value={id} disabled={index>1&&!guessed} className="flex min-h-12 flex-col gap-1 px-1 py-2 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground sm:flex-row sm:gap-2 sm:text-sm"><Icon className="size-4 shrink-0" /><span>{index + 1}. {label}</span></TabsTrigger>)}
@@ -172,7 +183,7 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
         <TabsContent value="understand" className="space-y-5 pt-4"><h3 className="font-display text-xl font-bold">Understand the problem</h3>{body[0]}<h3 className="font-display text-xl font-bold">Examples</h3>{body[1]}</TabsContent>
         <TabsContent value="guess" className="space-y-5 pt-4"><h3 className="font-display text-xl font-bold">Which pattern fits?</h3><div className="grid gap-2 sm:grid-cols-2">{patternOptions.map(option=>{const state=validSlowerGuess(b,option)&&session.patternGuess===option?'selected':guessState(option,session.patternGuess,b.pattern.name);return <Button key={option} variant="outline" aria-pressed={session.patternGuess===option} className={cn('h-auto min-h-12 whitespace-normal disabled:opacity-100',state==='correct'&&'border-success bg-success/15 text-success ring-2 ring-success',state==='selected'&&'border-primary bg-primary-soft text-primary ring-2 ring-primary',state==='wrong'&&'border-destructive bg-destructive/10 text-destructive ring-2 ring-destructive')} disabled={Boolean(session.patternGuess)} onClick={()=>prediction('pattern',option,option===b.pattern.name)}>{state==='correct'&&<Check className="size-4" />}{state==='wrong'&&<X className="size-4" />}{option}</Button>;})}</div>{session.patternGuess&&<p role="status" className={cn('text-sm',session.patternGuess===b.pattern.name?'text-success':validSlowerGuess(b,session.patternGuess)?'text-primary':'text-destructive')}>{patternVerdict(b,session.patternGuess)}</p>}{b.complexity_lab&&<ComplexityLab mode="guess" lab={b.complexity_lab} code="" initialBet={session.complexityGuess as Growth | undefined} onBet={value=>prediction('complexity',value,value===b.complexity_lab?.optimized_time)} onAnswer={()=>{}} />}</TabsContent>
         <TabsContent forceMount value="walkthrough" className="space-y-5 pt-4 data-[state=inactive]:hidden"><Visualizer viz={b.visualization} exampleInput={b.examples[0]?.input??""} hideTechnique={!unlocked} />{playbackStory&&<StoryMode story={playbackStory} onAnswer={answer} allowEnding={unlocked} audioUrl={audioUrl} />}</TabsContent>
-        <TabsContent forceMount value="code" className="pt-4 data-[state=inactive]:hidden"><CodePractice problem={`${b.title}\n${b.understand.restatement}\n${b.understand.constraints.join('; ')}`} attempt={codeAttempt} onSave={onCodeSave??(()=>{})} onSubmitted={()=>setSession(prev=>({...prev,submitted:true}))} onReviewed={result=>{ onReviewed?.(result); if(result.verdict==='Looks correct') {setSession(prev=>award(prev,'code',true)); setBurst(true);recordPracticeDay();} }} /><Button variant="ghost" className="mt-3" disabled={unlocked} onClick={revealEarly}><Lock className="size-4" /> I'm stuck, reveal</Button></TabsContent>
+        <TabsContent forceMount value="code" className="pt-4 data-[state=inactive]:hidden"><CodePractice problem={`${b.title}\n${b.understand.restatement}\n${b.understand.constraints.join('; ')}`} attempt={restartCount>0?freshAttempt:codeAttempt} onSave={attempt=>{setFreshAttempt(attempt);onCodeSave?.(attempt);}} onSubmitted={()=>setSession(prev=>({...prev,submitted:true}))} onReviewed={result=>{ onReviewed?.(result); if(result.verdict==='Looks correct') {setSession(prev=>award(prev,'code',true)); setBurst(true);recordPracticeDay();} }} /><Button variant="ghost" className="mt-3" disabled={unlocked} onClick={revealEarly}><Lock className="size-4" /> I'm stuck, reveal</Button></TabsContent>
         <TabsContent forceMount value="bug" className="pt-4 data-[state=inactive]:hidden"><BugPractice problem={b.understand.restatement} title={b.title} sessionKey={sessionKey} /></TabsContent>
         <TabsContent value="reveal" className="space-y-5 pt-4">
         {!unlocked&&<div className="flex flex-wrap items-center gap-3"><Lock className="size-5" /><p className="text-sm">Submit your code for review to unlock the answers.</p><Button variant="outline" onClick={revealEarly}>I'm stuck, reveal</Button></div>}
