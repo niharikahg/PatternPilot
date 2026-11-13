@@ -30,7 +30,7 @@ export const Route = createFileRoute("/workspace")({
   head: () => ({
     meta: [
       { title: "Workspace — PatternPilot" },
-      { name: "description", content: "Paste a coding problem and get a structured 6-step interview breakdown." },
+      { name: "description", content: "Paste a coding problem and get a seven-step coding interview practice session." },
       { property: "og:title", content: "Workspace — PatternPilot" },
       { property: "og:description", content: "Break down coding interview problems step by step." },
       { property: "og:type", content: "website" },
@@ -162,7 +162,7 @@ function Workspace() {
           className="min-h-36 resize-y border-0 p-0 shadow-none focus-visible:ring-0"
         />
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t pt-3">
-          <span className="text-xs text-muted-foreground">{text.trim().length < 10 ? "Choose a problem above or paste a complete question." : "Ready for your six-step breakdown"}</span>
+          <span className="text-xs text-muted-foreground">{text.trim().length < 10 ? "Choose a problem above or paste a complete question." : "Ready for your seven-step breakdown"}</span>
           <div className="relative ml-auto flex items-center py-3 pl-12">
           {!run.isPending && text.trim().length >= 10 && <span aria-hidden="true" className="pointer-events-none absolute left-0 top-0 z-10 text-6xl leading-none motion-safe:animate-bounce">👉</span>}
           <Button className="rounded-full px-5 shadow-pop" onClick={() => run.mutate(text)} disabled={run.isPending || text.trim().length < 10}>
