@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Check, Copy, Eye, EyeOff } from "lucide-react";
+import { Check, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -42,12 +42,8 @@ export function BreakdownView({ b, actions, onIntuition }: { b: Breakdown; actio
       if (c >= 2) toast.success(`${c}x combo!`);
     } else toast("Not quite. Combo reset, try the next one!");
   };
-  const [step, setStep] = useState(0);
-  const [revealed, setRevealed] = useState<Record<number, boolean>>({});
-  const [thinkFirst, setThinkFirst] = useState(true);
   const [lang, setLang] = useState<Lang>("python");
   const [copied, setCopied] = useState(false);
-  const shown = !thinkFirst || revealed[step];
 
   const copy = async () => {
     await navigator.clipboard.writeText(breakdownToMarkdown(b, lang));
@@ -101,13 +97,16 @@ export function BreakdownView({ b, actions, onIntuition }: { b: Breakdown; actio
     <div key="s">
       <div className="mb-3 inline-flex rounded-md border p-0.5">
         {(["python", "java", "javascript"] as Lang[]).map((l) => (
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
+            aria-pressed={lang === l}
             key={l}
             onClick={() => setLang(l)}
             className={cn("rounded px-3 py-1 text-sm capitalize transition-colors", lang === l ? "bg-accent font-medium" : "text-muted-foreground")}
           >
             {l === "javascript" ? "JavaScript" : l}
-          </button>
+          </Button>
         ))}
       </div>
       <Code>{b.solution[lang]}</Code>
@@ -131,10 +130,6 @@ export function BreakdownView({ b, actions, onIntuition }: { b: Breakdown; actio
         <Badge variant="outline">{b.pattern.name}</Badge>
         <div className="ml-auto flex flex-wrap gap-2">
           {b.story && b.story.scenes.length > 0 && <StoryMode story={b.story} onAnswer={answer} />}
-          <Button variant="outline" size="sm" onClick={() => setThinkFirst(!thinkFirst)}>
-            {thinkFirst ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            Think first: {thinkFirst ? "on" : "off"}
-          </Button>
           <Button variant="outline" size="sm" onClick={copy}>
             {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />} Copy notes
           </Button>
@@ -142,46 +137,23 @@ export function BreakdownView({ b, actions, onIntuition }: { b: Breakdown; actio
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-[200px_1fr]">
-        <ol className="flex gap-1 overflow-x-auto md:flex-col">
-          {STEPS.map((s, i) => (
-            <li key={s}>
-              <button
-                onClick={() => setStep(i)}
-                className={cn(
-                  "flex w-full items-center gap-3 whitespace-nowrap rounded-md px-3 py-2 text-left text-sm transition-colors",
-                  step === i ? "bg-accent font-medium" : "text-muted-foreground hover:bg-accent/60",
-                )}
-              >
-                <span className={cn("grid h-6 w-6 shrink-0 place-items-center rounded-full border font-mono text-xs", step === i && "border-primary bg-primary text-primary-foreground", i < step && "border-primary text-primary")}>
-                  {i + 1}
-                </span>
-                {s}
-              </button>
-            </li>
-          ))}
-        </ol>
-
-        <div className="surface min-h-64 p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="font-medium">{STEPS[step]}</h3>
-            <span className="font-mono text-xs text-muted-foreground">{step + 1}/6</span>
-          </div>
-          {shown ? (
-            <div className="animate-in fade-in duration-300">{body[step]}</div>
-          ) : (
-            <div className="flex flex-col items-center justify-center rounded-md border border-dashed py-14 text-center">
-              <p className="text-sm text-muted-foreground">Take a minute to work through this step yourself.</p>
-              <Button className="mt-4" size="sm" onClick={() => setRevealed({ ...revealed, [step]: true })}>
-                <Eye className="h-4 w-4" /> Reveal {STEPS[step]?.toLowerCase()}
-              </Button>
+      <nav aria-label="Breakdown sections" className="flex flex-wrap gap-2 border-y py-3">
+        {STEPS.map((label, i) => (
+          <Button key={label} asChild variant="ghost" size="sm">
+            <a href={`#breakdown-${i}`}><span className="font-mono text-xs text-primary">0{i + 1}</span>{label}</a>
+          </Button>
+        ))}
+      </nav>
+      <div className="grid items-start gap-x-8 gap-y-6 md:grid-cols-2">
+        {STEPS.map((label, i) => (
+          <section key={label} id={`breakdown-${i}`} aria-label={label} className="min-w-0 scroll-mt-24 border-t-2 border-primary/30 pt-4">
+            <div className="mb-4 flex items-center gap-3">
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-highlight font-mono text-sm font-semibold text-highlight-foreground">0{i + 1}</span>
+              <h3 className="text-lg font-semibold">{label}</h3>
             </div>
-          )}
-          <div className="mt-6 flex justify-between border-t pt-4">
-            <Button variant="ghost" size="sm" disabled={step === 0} onClick={() => setStep(step - 1)}>Back</Button>
-            <Button variant="ghost" size="sm" disabled={step === 5} onClick={() => setStep(step + 1)}>Next step</Button>
-          </div>
-        </div>
+            {body[i]}
+          </section>
+        ))}
       </div>
 
       {b.complexity_lab && <ComplexityLab lab={b.complexity_lab} code={b.solution.python} onAnswer={answer} />}
