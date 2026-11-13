@@ -28,3 +28,7 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Architecture
+- AI breakdowns are generated in `src/lib/breakdown.functions.ts` (auth-required server fn, strict JSON schema mirroring `Breakdown` in `src/lib/types.ts`); keep the schema and type in sync so saved rows stay renderable.
+- Saved problems store the full breakdown as jsonb in `public.problems`, read/written from the browser under per-user RLS.
