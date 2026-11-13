@@ -1,0 +1,116 @@
+{
+  "title": "Count Set Bits",
+  "difficulty": "Easy",
+  "understand": {
+    "restatement": "Given a nonnegative integer n smaller than 2^31, return the number of 1 bits in its binary representation.",
+    "inputs": "n = 13",
+    "outputs": "The result specified in the problem statement.",
+    "constraints": [
+      "Given a nonnegative integer n smaller than 2^31, return the number of 1 bits in its binary representation.",
+      "For JavaScript integer bit operations, inputs stay within the stated signed 31-bit domain."
+    ],
+    "clarifying_questions": []
+  },
+  "examples": [
+    {
+      "input": "n = 13",
+      "output": "3",
+      "explanation": "Removing the final set bit leaves zero: three removals."
+    },
+    {
+      "input": "n = 0",
+      "output": "0",
+      "explanation": "This boundary case follows the stated input and output rules."
+    }
+  ],
+  "pattern": {
+    "name": "Math & Bit Manipulation",
+    "why": "Repeatedly clear the lowest set bit with n & (n - 1), counting the removals. With the fixed 31-bit input domain, runtime is bounded.",
+    "recognize": "Repeatedly clear the lowest set bit with n & (n - 1), counting the removals. With the fixed 31-bit input domain, runtime is bounded."
+  },
+  "approach": {
+    "brute_force": "Convert to binary text and count the ones, allocating a string.",
+    "brute_force_pseudocode": "Convert to binary text and count the ones, allocating a string.",
+    "optimized": "Repeatedly clear the lowest set bit with n & (n - 1), counting the removals. With the fixed 31-bit input domain, runtime is bounded.",
+    "optimized_pseudocode": "Repeatedly clear the lowest set bit with n & (n - 1), counting the removals. With the fixed 31-bit input domain, runtime is bounded."
+  },
+  "solution": {
+    "python": "def count_bits(n):\n    count = 0\n    while n:\n        n &= n - 1\n        count += 1\n    return count",
+    "java": "class Solution {\n    public int countBits(int n) {\n        int count = 0;\n        while (n != 0) {\n            n &= n - 1;\n            count++;\n        }\n        return count;\n    }\n}",
+    "javascript": "function countBits(n) {\n    let count = 0;\n    while (n) {\n        n &= n - 1;\n        count++;\n    }\n    return count;\n}"
+  },
+  "complexity": {
+    "time": "O(1) for the fixed 31-bit domain",
+    "space": "O(1)",
+    "explanation": "Repeatedly clear the lowest set bit with n & (n - 1), counting the removals. With the fixed 31-bit input domain, runtime is bounded. Time is O(1) for the fixed 31-bit domain; additional storage is O(1).",
+    "follow_ups": [
+      "Which boundary inputs would you check before submitting?"
+    ]
+  },
+  "complexity_lab": {
+    "brute_force_time": "n",
+    "optimized_time": "1",
+    "optimized_space": "1",
+    "code_hotspots": [
+      {
+        "line": 2,
+        "runs": "O(1) for the fixed 31-bit domain",
+        "why": "This loop performs the main input-dependent work."
+      }
+    ]
+  },
+  "visualization": {
+    "kind": "array",
+    "frames": [
+      {
+        "cells": [
+          "1",
+          "1",
+          "0",
+          "1"
+        ],
+        "grid": [],
+        "highlight": [],
+        "pointers": [],
+        "vars": [],
+        "note": "13 is 1101 in binary."
+      },
+      {
+        "cells": [
+          "1",
+          "1",
+          "0",
+          "1"
+        ],
+        "grid": [],
+        "highlight": [
+          {
+            "row": 0,
+            "col": 3
+          }
+        ],
+        "pointers": [],
+        "vars": [],
+        "note": "Removing its lowest set bit leaves 1100, then 1000."
+      },
+      {
+        "cells": [
+          "1",
+          "1",
+          "0",
+          "1"
+        ],
+        "grid": [],
+        "highlight": [
+          {
+            "row": 0,
+            "col": 3
+          }
+        ],
+        "pointers": [],
+        "vars": [],
+        "note": "Removing the final set bit leaves zero: three removals."
+      }
+    ]
+  }
+}

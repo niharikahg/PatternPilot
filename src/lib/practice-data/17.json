@@ -1,0 +1,116 @@
+{
+  "title": "Move Zeroes",
+  "difficulty": "Easy",
+  "understand": {
+    "restatement": "Given an integer array nums, move every zero to the end in place while preserving the relative order of nonzero values. Return the modified array.",
+    "inputs": "nums = [0, 3, 0, 2]",
+    "outputs": "The result specified in the problem statement.",
+    "constraints": [
+      "Given an integer array nums, move every zero to the end in place while preserving the relative order of nonzero values. Return the modified array.",
+      "Use the input domain stated above; do not impose additional restrictions."
+    ],
+    "clarifying_questions": []
+  },
+  "examples": [
+    {
+      "input": "nums = [0, 3, 0, 2]",
+      "output": "[3, 2, 0, 0]",
+      "explanation": "Fill all remaining positions with zero."
+    },
+    {
+      "input": "nums = [0, 0]",
+      "output": "[0, 0]",
+      "explanation": "This boundary case follows the stated input and output rules."
+    }
+  ],
+  "pattern": {
+    "name": "Two Pointers",
+    "why": "Compact nonzero values into the front with a write index, then fill the remaining suffix with zeros.",
+    "recognize": "Compact nonzero values into the front with a write index, then fill the remaining suffix with zeros."
+  },
+  "approach": {
+    "brute_force": "Repeatedly remove each zero and append it to the end; shifting elements can take quadratic time.",
+    "brute_force_pseudocode": "Repeatedly remove each zero and append it to the end; shifting elements can take quadratic time.",
+    "optimized": "Compact nonzero values into the front with a write index, then fill the remaining suffix with zeros.",
+    "optimized_pseudocode": "Compact nonzero values into the front with a write index, then fill the remaining suffix with zeros."
+  },
+  "solution": {
+    "python": "def move_zeroes(nums):\n    write = 0\n    for value in nums:\n        if value != 0:\n            nums[write] = value\n            write += 1\n    for index in range(write, len(nums)):\n        nums[index] = 0\n    return nums",
+    "java": "class Solution {\n    public int[] moveZeroes(int[] nums) {\n        int write = 0;\n        for (int value : nums) {\n            if (value != 0) nums[write++] = value;\n        }\n        while (write < nums.length) nums[write++] = 0;\n        return nums;\n    }\n}",
+    "javascript": "function moveZeroes(nums) {\n    let write = 0;\n    for (const value of nums) {\n        if (value !== 0) nums[write++] = value;\n    }\n    while (write < nums.length) nums[write++] = 0;\n    return nums;\n}"
+  },
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)",
+    "explanation": "Compact nonzero values into the front with a write index, then fill the remaining suffix with zeros. Time is O(n); additional storage is O(1).",
+    "follow_ups": [
+      "Which boundary inputs would you check before submitting?"
+    ]
+  },
+  "complexity_lab": {
+    "brute_force_time": "n2",
+    "optimized_time": "n",
+    "optimized_space": "1",
+    "code_hotspots": [
+      {
+        "line": 2,
+        "runs": "O(n)",
+        "why": "This loop performs the main input-dependent work."
+      }
+    ]
+  },
+  "visualization": {
+    "kind": "array",
+    "frames": [
+      {
+        "cells": [
+          "0",
+          "3",
+          "0",
+          "2"
+        ],
+        "grid": [],
+        "highlight": [],
+        "pointers": [],
+        "vars": [],
+        "note": "The next nonzero value will be written at index 0."
+      },
+      {
+        "cells": [
+          "0",
+          "3",
+          "0",
+          "2"
+        ],
+        "grid": [],
+        "highlight": [
+          {
+            "row": 0,
+            "col": 3
+          }
+        ],
+        "pointers": [],
+        "vars": [],
+        "note": "Write 3 and then 2 to the next available positions."
+      },
+      {
+        "cells": [
+          "0",
+          "3",
+          "0",
+          "2"
+        ],
+        "grid": [],
+        "highlight": [
+          {
+            "row": 0,
+            "col": 3
+          }
+        ],
+        "pointers": [],
+        "vars": [],
+        "note": "Fill all remaining positions with zero."
+      }
+    ]
+  }
+}

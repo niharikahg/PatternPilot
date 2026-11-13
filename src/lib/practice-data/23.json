@@ -1,0 +1,119 @@
+{
+  "title": "Maximum Nonadjacent Sum",
+  "difficulty": "Medium",
+  "understand": {
+    "restatement": "Given a list nums of nonnegative integers, choose elements with no two chosen positions adjacent. Return the largest possible sum. You may choose none, and empty lists return 0.",
+    "inputs": "nums = [2, 7, 9, 3, 1]",
+    "outputs": "The result specified in the problem statement.",
+    "constraints": [
+      "Given a list nums of nonnegative integers, choose elements with no two chosen positions adjacent. Return the largest possible sum. You may choose none, and empty lists return 0.",
+      "Use the input domain stated above; do not impose additional restrictions."
+    ],
+    "clarifying_questions": []
+  },
+  "examples": [
+    {
+      "input": "nums = [2, 7, 9, 3, 1]",
+      "output": "12",
+      "explanation": "Choosing 2, 9, and 1 gives the maximum sum 12."
+    },
+    {
+      "input": "nums = []",
+      "output": "0",
+      "explanation": "This boundary case follows the stated input and output rules."
+    }
+  ],
+  "pattern": {
+    "name": "Dynamic Programming",
+    "why": "Only the last two prefix results are needed. Update them after comparing taking the current value with skipping it.",
+    "recognize": "Only the last two prefix results are needed. Update them after comparing taking the current value with skipping it."
+  },
+  "approach": {
+    "brute_force": "Store the best result for every prefix in an array using the same take-or-skip recurrence; this uses O(n) memory.",
+    "brute_force_pseudocode": "Store the best result for every prefix in an array using the same take-or-skip recurrence; this uses O(n) memory.",
+    "optimized": "Only the last two prefix results are needed. Update them after comparing taking the current value with skipping it.",
+    "optimized_pseudocode": "Only the last two prefix results are needed. Update them after comparing taking the current value with skipping it."
+  },
+  "solution": {
+    "python": "def max_nonadjacent(nums):\n    previous, current = 0, 0\n    for value in nums:\n        previous, current = current, max(current, previous + value)\n    return current",
+    "java": "class Solution {\n    public long maxNonadjacent(int[] nums) {\n        long previous = 0, current = 0;\n        for (int value : nums) {\n            long next = Math.max(current, previous + value);\n            previous = current;\n            current = next;\n        }\n        return current;\n    }\n}",
+    "javascript": "function maxNonadjacent(nums) {\n    let previous = 0, current = 0;\n    for (const value of nums) {\n        const next = Math.max(current, previous + value);\n        previous = current;\n        current = next;\n    }\n    return current;\n}"
+  },
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)",
+    "explanation": "Only the last two prefix results are needed. Update them after comparing taking the current value with skipping it. Time is O(n); additional storage is O(1).",
+    "follow_ups": [
+      "Which boundary inputs would you check before submitting?"
+    ]
+  },
+  "complexity_lab": {
+    "brute_force_time": "n",
+    "optimized_time": "n",
+    "optimized_space": "1",
+    "code_hotspots": [
+      {
+        "line": 2,
+        "runs": "O(n)",
+        "why": "This loop performs the main input-dependent work."
+      }
+    ]
+  },
+  "visualization": {
+    "kind": "array",
+    "frames": [
+      {
+        "cells": [
+          "2",
+          "7",
+          "9",
+          "3",
+          "1"
+        ],
+        "grid": [],
+        "highlight": [],
+        "pointers": [],
+        "vars": [],
+        "note": "Before reading any values, the best sum is zero."
+      },
+      {
+        "cells": [
+          "2",
+          "7",
+          "9",
+          "3",
+          "1"
+        ],
+        "grid": [],
+        "highlight": [
+          {
+            "row": 0,
+            "col": 4
+          }
+        ],
+        "pointers": [],
+        "vars": [],
+        "note": "For each value, compare skipping it with adding it to the best sum two positions back."
+      },
+      {
+        "cells": [
+          "2",
+          "7",
+          "9",
+          "3",
+          "1"
+        ],
+        "grid": [],
+        "highlight": [
+          {
+            "row": 0,
+            "col": 4
+          }
+        ],
+        "pointers": [],
+        "vars": [],
+        "note": "Choosing 2, 9, and 1 gives the maximum sum 12."
+      }
+    ]
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "title": "Can Reach the End",
+  "difficulty": "Medium",
+  "understand": {
+    "restatement": "Given a nonempty array nums of nonnegative integers, start at index 0. Each value is the maximum number of positions you may jump forward from there. Return whether you can reach the final index.",
+    "inputs": "nums = [2, 3, 1, 1, 4]",
+    "outputs": "The result specified in the problem statement.",
+    "constraints": [
+      "Given a nonempty array nums of nonnegative integers, start at index 0. Each value is the maximum number of positions you may jump forward from there. Return whether you can reach the final index.",
+      "Use the input domain stated above; do not impose additional restrictions."
+    ],
+    "clarifying_questions": []
+  },
+  "examples": [
+    {
+      "input": "nums = [2, 3, 1, 1, 4]",
+      "output": "True",
+      "explanation": "The last index is reachable: return True."
+    },
+    {
+      "input": "nums = [3, 2, 1, 0, 4]",
+      "output": "False",
+      "explanation": "This boundary case follows the stated input and output rules."
+    }
+  ],
+  "pattern": {
+    "name": "Greedy",
+    "why": "Scan reachable indices while maintaining the farthest position any of them can reach. A gap beyond that boundary makes the end unreachable.",
+    "recognize": "Scan reachable indices while maintaining the farthest position any of them can reach. A gap beyond that boundary makes the end unreachable."
+  },
+  "approach": {
+    "brute_force": "For each position, inspect all earlier reachable positions to decide whether any can jump to it; this takes O(n\u00b2) time.",
+    "brute_force_pseudocode": "For each position, inspect all earlier reachable positions to decide whether any can jump to it; this takes O(n\u00b2) time.",
+    "optimized": "Scan reachable indices while maintaining the farthest position any of them can reach. A gap beyond that boundary makes the end unreachable.",
+    "optimized_pseudocode": "Scan reachable indices while maintaining the farthest position any of them can reach. A gap beyond that boundary makes the end unreachable."
+  },
+  "solution": {
+    "python": "def can_reach(nums):\n    farthest = 0\n    for index, jump in enumerate(nums):\n        if index > farthest:\n            return False\n        farthest = max(farthest, index + jump)\n        if farthest >= len(nums) - 1:\n            return True\n    return True",
+    "java": "class Solution {\n    public boolean canReach(int[] nums) {\n        int farthest = 0;\n        for (int i = 0; i < nums.length; i++) {\n            if (i > farthest) return false;\n            farthest = Math.max(farthest, i + nums[i]);\n            if (farthest >= nums.length - 1) return true;\n        }\n        return true;\n    }\n}",
+    "javascript": "function canReach(nums) {\n    let farthest = 0;\n    for (let i = 0; i < nums.length; i++) {\n        if (i > farthest) return false;\n        farthest = Math.max(farthest, i + nums[i]);\n        if (farthest >= nums.length - 1) return true;\n    }\n    return true;\n}"
+  },
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)",
+    "explanation": "Scan reachable indices while maintaining the farthest position any of them can reach. A gap beyond that boundary makes the end unreachable. Time is O(n); additional storage is O(1).",
+    "follow_ups": [
+      "Which boundary inputs would you check before submitting?"
+    ]
+  },
+  "complexity_lab": {
+    "brute_force_time": "n2",
+    "optimized_time": "n",
+    "optimized_space": "1",
+    "code_hotspots": [
+      {
+        "line": 2,
+        "runs": "O(n)",
+        "why": "This loop performs the main input-dependent work."
+      }
+    ]
+  },
+  "visualization": {
+    "kind": "array",
+    "frames": [
+      {
+        "cells": [
+          "2",
+          "3",
+          "1",
+          "1",
+          "4"
+        ],
+        "grid": [],
+        "highlight": [],
+        "pointers": [],
+        "vars": [],
+        "note": "Index 0 can reach index 2."
+      },
+      {
+        "cells": [
+          "2",
+          "3",
+          "1",
+          "1",
+          "4"
+        ],
+        "grid": [],
+        "highlight": [
+          {
+            "row": 0,
+            "col": 4
+          }
+        ],
+        "pointers": [],
+        "vars": [],
+        "note": "Reachable index 1 extends the farthest reachable position to index 4."
+      },
+      {
+        "cells": [
+          "2",
+          "3",
+          "1",
+          "1",
+          "4"
+        ],
+        "grid": [],
+        "highlight": [
+          {
+            "row": 0,
+            "col": 4
+          }
+        ],
+        "pointers": [],
+        "vars": [],
+        "note": "The last index is reachable: return True."
+      }
+    ]
+  }
+}

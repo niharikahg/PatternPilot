@@ -1,0 +1,113 @@
+{
+  "title": "Find Missing Number",
+  "difficulty": "Easy",
+  "understand": {
+    "restatement": "Given nums containing n distinct integers drawn from 0 through n inclusive, return the one missing value. The array may be empty.",
+    "inputs": "nums = [3, 0, 1]",
+    "outputs": "The result specified in the problem statement.",
+    "constraints": [
+      "Given nums containing n distinct integers drawn from 0 through n inclusive, return the one missing value. The array may be empty.",
+      "Use the input domain stated above; do not impose additional restrictions."
+    ],
+    "clarifying_questions": []
+  },
+  "examples": [
+    {
+      "input": "nums = [3, 0, 1]",
+      "output": "2",
+      "explanation": "The difference is 2, the missing value."
+    },
+    {
+      "input": "nums = []",
+      "output": "0",
+      "explanation": "This boundary case follows the stated input and output rules."
+    }
+  ],
+  "pattern": {
+    "name": "Math & Bit Manipulation",
+    "why": "XOR all indices, all values, and n. Matching values cancel, leaving only the missing value; unlike a sum, XOR does not risk arithmetic overflow.",
+    "recognize": "XOR all indices, all values, and n. Matching values cancel, leaving only the missing value; unlike a sum, XOR does not risk arithmetic overflow."
+  },
+  "approach": {
+    "brute_force": "For each possible value from 0 to n, search the array for it.",
+    "brute_force_pseudocode": "For each possible value from 0 to n, search the array for it.",
+    "optimized": "XOR all indices, all values, and n. Matching values cancel, leaving only the missing value; unlike a sum, XOR does not risk arithmetic overflow.",
+    "optimized_pseudocode": "XOR all indices, all values, and n. Matching values cancel, leaving only the missing value; unlike a sum, XOR does not risk arithmetic overflow."
+  },
+  "solution": {
+    "python": "def missing_number(nums):\n    missing = len(nums)\n    for index, value in enumerate(nums):\n        missing ^= index ^ value\n    return missing",
+    "java": "class Solution {\n    public int missingNumber(int[] nums) {\n        int missing = nums.length;\n        for (int i = 0; i < nums.length; i++) missing ^= i ^ nums[i];\n        return missing;\n    }\n}",
+    "javascript": "function missingNumber(nums) {\n    let missing = nums.length;\n    for (let i = 0; i < nums.length; i++) missing ^= i ^ nums[i];\n    return missing;\n}"
+  },
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)",
+    "explanation": "XOR all indices, all values, and n. Matching values cancel, leaving only the missing value; unlike a sum, XOR does not risk arithmetic overflow. Time is O(n); additional storage is O(1).",
+    "follow_ups": [
+      "Which boundary inputs would you check before submitting?"
+    ]
+  },
+  "complexity_lab": {
+    "brute_force_time": "n2",
+    "optimized_time": "n",
+    "optimized_space": "1",
+    "code_hotspots": [
+      {
+        "line": 2,
+        "runs": "O(n)",
+        "why": "This loop performs the main input-dependent work."
+      }
+    ]
+  },
+  "visualization": {
+    "kind": "array",
+    "frames": [
+      {
+        "cells": [
+          "3",
+          "0",
+          "1"
+        ],
+        "grid": [],
+        "highlight": [],
+        "pointers": [],
+        "vars": [],
+        "note": "The allowed values are 0 through 3."
+      },
+      {
+        "cells": [
+          "3",
+          "0",
+          "1"
+        ],
+        "grid": [],
+        "highlight": [
+          {
+            "row": 0,
+            "col": 2
+          }
+        ],
+        "pointers": [],
+        "vars": [],
+        "note": "The complete sum is 6; the array sum is 4."
+      },
+      {
+        "cells": [
+          "3",
+          "0",
+          "1"
+        ],
+        "grid": [],
+        "highlight": [
+          {
+            "row": 0,
+            "col": 2
+          }
+        ],
+        "pointers": [],
+        "vars": [],
+        "note": "The difference is 2, the missing value."
+      }
+    ]
+  }
+}
