@@ -34,7 +34,7 @@ export function Logo() {
 
 export function AppHeader() {
   const link = "rounded-full px-4 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground";
-  const active = { className: "bg-foreground text-background hover:bg-foreground hover:text-background" };
+  const active = { className: "bg-foreground !text-background hover:bg-foreground" };
   return (
     <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4">
