@@ -14,7 +14,7 @@ export function Ambient({ density = 14 }: { density?: number }) {
   useEffect(() => {
     setItems(Array.from({ length: density }, (_, i) => ({
       x: Math.random() * 100, y: Math.random() * 100,
-      g: GLYPHS[i % GLYPHS.length], d: 6 + Math.random() * 8, s: 0.8 + Math.random() * 1.2,
+      g: GLYPHS[i % GLYPHS.length]!, d: 6 + Math.random() * 8, s: 0.8 + Math.random() * 1.2,
     })));
     const on = (e: PointerEvent) => { mx.set(e.clientX - 200); my.set(e.clientY - 200); };
     window.addEventListener("pointermove", on);

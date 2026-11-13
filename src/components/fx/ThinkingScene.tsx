@@ -8,7 +8,7 @@ export function ThinkingScene() {
   const [i, setI] = useState(0);
   useEffect(() => { const id = setInterval(() => setI((x) => (x + 1) % LINES.length), 1800); return () => clearInterval(id); }, []);
   const nodes = Array.from({ length: 9 }, (_, k) => ({ x: 15 + (k % 3) * 35, y: 20 + Math.floor(k / 3) * 30 }));
-  const edges = [[0, 4], [1, 4], [2, 4], [3, 4], [4, 5], [4, 6], [4, 7], [4, 8], [0, 1], [6, 7], [2, 5]];
+  const edges: [number, number][] = [[0, 4], [1, 4], [2, 4], [3, 4], [4, 5], [4, 6], [4, 7], [4, 8], [0, 1], [6, 7], [2, 5]];
 
   return (
     <div className="surface relative mt-10 overflow-hidden p-8">
@@ -16,7 +16,7 @@ export function ThinkingScene() {
       <div className="relative grid items-center gap-8 md:grid-cols-2">
         <svg viewBox="0 0 100 90" className="mx-auto h-56 w-full max-w-sm">
           {edges.map(([a, b], k) => (
-            <motion.line key={k} x1={nodes[a].x} y1={nodes[a].y} x2={nodes[b].x} y2={nodes[b].y}
+            <motion.line key={k} x1={nodes[a]!.x} y1={nodes[a]!.y} x2={nodes[b]!.x} y2={nodes[b]!.y}
               stroke="currentColor" strokeWidth={0.6} className="text-foreground/30"
               initial={{ pathLength: 0 }} animate={{ pathLength: [0, 1, 1], opacity: [0.2, 1, 0.2] }}
               transition={{ duration: 2.4, repeat: Infinity, delay: k * 0.18 }} />

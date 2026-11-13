@@ -8,9 +8,9 @@ const TARGET = 26;
 export function HeroScene() {
   const [t, setT] = useState(0);
   useEffect(() => { const id = setInterval(() => setT((x) => (x + 1) % 4), 1300); return () => clearInterval(id); }, []);
-  const steps = [[0, 5], [0, 4], [1, 4], [1, 4]];
-  const [l, r] = steps[t];
-  const sum = ARR[l] + ARR[r];
+  const steps: [number, number][] = [[0, 5], [0, 4], [1, 4], [1, 4]];
+  const [l, r] = steps[t]!;
+  const sum = ARR[l]! + ARR[r]!;
   const found = t === 3;
 
   return (
