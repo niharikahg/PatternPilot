@@ -1,8 +1,9 @@
 import { useState, type ReactNode } from "react";
-import { Check, Copy } from "lucide-react";
+import { ArrowUpRight, BookOpen, Check, Code2, Copy, Gauge, Layers, ListChecks, Workflow } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import type { Breakdown } from "@/lib/types";
 import { breakdownToMarkdown } from "@/lib/markdown";
@@ -15,6 +16,7 @@ import { AnimatePresence, motion } from "framer-motion";
 
 type Lang = keyof Breakdown["solution"];
 const STEPS = ["Understand", "Examples", "Pattern", "Approach", "Solution", "Complexity"] as const;
+const ICONS = [BookOpen, ListChecks, Layers, Workflow, Code2, Gauge];
 
 function Code({ children }: { children: string }) {
   return (
@@ -44,6 +46,8 @@ export function BreakdownView({ b, actions, onIntuition }: { b: Breakdown; actio
   };
   const [lang, setLang] = useState<Lang>("python");
   const [copied, setCopied] = useState(false);
+  const [opened, setOpened] = useState<number | null>(null);
+  const previews = [b.understand.restatement, `${b.examples.length} test cases`, b.pattern.name, b.approach.optimized, "Python · Java · JavaScript", `Time ${b.complexity.time} · Space ${b.complexity.space}`];
 
   const copy = async () => {
     await navigator.clipboard.writeText(breakdownToMarkdown(b, lang));
@@ -137,24 +141,27 @@ export function BreakdownView({ b, actions, onIntuition }: { b: Breakdown; actio
         </div>
       </div>
 
-      <nav aria-label="Breakdown sections" className="flex flex-wrap gap-2 border-y py-3">
-        {STEPS.map((label, i) => (
-          <Button key={label} asChild variant="ghost" size="sm">
-            <a href={`#breakdown-${i}`}><span className="font-mono text-xs text-primary">0{i + 1}</span>{label}</a>
-          </Button>
-        ))}
-      </nav>
-      <div className="grid items-start gap-x-8 gap-y-6 md:grid-cols-2">
-        {STEPS.map((label, i) => (
-          <section key={label} id={`breakdown-${i}`} aria-label={label} className="min-w-0 scroll-mt-24 border-t-2 border-primary/30 pt-4">
-            <div className="mb-4 flex items-center gap-3">
-              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-highlight font-mono text-sm font-semibold text-highlight-foreground">0{i + 1}</span>
-              <h3 className="text-lg font-semibold">{label}</h3>
-            </div>
-            {body[i]}
-          </section>
-        ))}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {STEPS.map((label, i) => {
+          const Icon = ICONS[i] ?? BookOpen;
+          return (
+            <Button key={label} variant="outline" aria-label={`Open ${label}`} onClick={() => setOpened(i)} className={cn("group h-52 min-w-0 flex-col items-stretch justify-between whitespace-normal rounded-lg p-5 text-left transition-transform motion-safe:hover:-translate-y-1", i === 0 && "border-highlight bg-highlight text-highlight-foreground hover:bg-highlight/90", i === 4 && "border-foreground bg-foreground text-background hover:bg-foreground/90 hover:text-background")}>
+              <span className="flex items-center justify-between"><Icon className="size-5" /><span className="font-mono text-xs opacity-60">0{i + 1}</span></span>
+              <span><span className="block font-display text-xl font-bold">{label}</span><span className="mt-2 line-clamp-2 text-sm font-normal leading-relaxed opacity-75">{previews[i]}</span></span>
+              <ArrowUpRight className="ml-auto size-4" />
+            </Button>
+          );
+        })}
       </div>
+      <Dialog open={opened !== null} onOpenChange={(open) => { if (!open) setOpened(null); }}>
+        <DialogContent className="max-h-[85dvh] w-[calc(100%-2rem)] max-w-3xl overflow-y-auto rounded-lg">
+          <DialogHeader className="pr-6">
+            <DialogTitle className="font-display text-2xl">{opened === null ? "" : STEPS[opened]}</DialogTitle>
+            <DialogDescription>{b.title}</DialogDescription>
+          </DialogHeader>
+          <div className="min-w-0">{opened === null ? null : body[opened]}</div>
+        </DialogContent>
+      </Dialog>
 
       {b.complexity_lab && <ComplexityLab lab={b.complexity_lab} code={b.solution.python} onAnswer={answer} />}
       <Visualizer viz={b.visualization} />
