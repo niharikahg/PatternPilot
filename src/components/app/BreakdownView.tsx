@@ -58,7 +58,7 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
     navigationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
   const guessed = Boolean(session.patternGuess && (!b.complexity_lab || session.complexityGuess));
-  const unlocked = guessed && (session.submitted || session.early);
+  const unlocked = session.submitted || session.early;
   const playbackStory = useMemo(() => audioUrl && !audioUrl.startsWith('blob:') ? b.story : storyWithEnding(b), [b,audioUrl]);
   useEffect(() => { try { const value = localStorage.getItem(`pp-flow-${sessionKey}`); if(value) setSession(JSON.parse(value)); } catch {} setReady(true); }, [sessionKey]);
   useEffect(() => { if(ready) try { localStorage.setItem(`pp-flow-${sessionKey}`, JSON.stringify(session)); } catch {} }, [session, ready, sessionKey]);
@@ -74,7 +74,7 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
     { id: "log", label: "Log it", icon: Check },
   ];
   const activeIndex = views.findIndex((view) => view.id === session.step);
-  const switchView = (value: string) => { if(!canOpenPracticeStep(value,session,Boolean(b.complexity_lab))) return; setSession(prev=>({...prev,step:value})); navigationRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); };
+  const switchView = (value: string) => { if(!canOpenPracticeStep(value,session,Boolean(b.complexity_lab))) return; setSession(prev=>({...prev,step:value})); };
   const answer = (correct: boolean) => { setSession(prev=>({...prev, correct:prev.correct+(correct?1:0), attempts:prev.attempts+1, combo:correct?prev.combo+1:0})); setBurst(true); if(correct) celebrate(1); };
   const prediction = (key:string, value:string, correct:boolean) => { setSession(prev=>({...award(prev,key,correct), ...(key==='pattern'?{patternGuess:value}:{complexityGuess:value})})); setBurst(true); recordPracticeDay(); };
   const revealEarly = () => { if(!window.confirm("Are you sure? Revealing now lowers your intuition score and code XP.")) return; setSession(prev=>earlyReveal(prev)); setBurst(true); };
@@ -212,7 +212,7 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
           <div className="min-w-0">{opened === null ? null : body[opened]}</div>
         </DialogContent>
       </Dialog>
-      {unlocked&&b.complexity_lab&&<ComplexityLab mode="reveal" lab={b.complexity_lab} code={b.solution.python} onAnswer={answer} />}
+      {unlocked&&b.complexity_lab&&<ComplexityLab mode="reveal" initialBet={session.complexityGuess as Growth | undefined} lab={b.complexity_lab} code={b.solution.python} onAnswer={answer} />}
       </TabsContent>
       <TabsContent value="log" className="pt-4">{logControls ?? actions}</TabsContent>
       <div className="mt-5 flex items-center justify-between gap-3 border-t pt-4">
