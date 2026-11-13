@@ -36,3 +36,4 @@ use the editor.
 - Waiting-screen questions and answer explanations stay local with the tips; interactions must not add AI requests or delay the result.
 - Waiting questions use a device-local history of displayed question indices and random sampling without replacement; stop questions when the local bank is exhausted instead of recycling them.
 - Render the six breakdown sections as shared preview flashcards opening scrollable detail dialogs, so workspace and saved problems remain consistent.
+- Keep workspace onboarding device-local and separate input/waiting from the review state; guide dismissal must not require an account or send extra requests.
