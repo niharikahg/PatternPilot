@@ -12,6 +12,7 @@ import { reviewOutcome } from "@/lib/guess-feedback";
 import { dayKey } from "@/lib/practice";
 import { builtinAudio } from "@/lib/builtins";
 import { ReviewTracker } from "@/components/app/ReviewTracker";
+import { AppHeader } from "@/components/app/AppHeader";
 
 export const Route = createFileRoute("/problems/$id")({
   validateSearch: (search: { practice?: unknown }) => ({ practice: search["practice"] === true || search["practice"] === "true" }),
@@ -52,7 +53,7 @@ function ProblemPage() {
   });
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10">
+    <><AppHeader /><main className="mx-auto max-w-6xl px-4 py-10">
       <Ambient density={10} />
       <Link to="/dashboard" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> Dashboard
@@ -71,6 +72,6 @@ function ProblemPage() {
  </>} onReviewed={result=>{updateProblem(id,{practice_status:reviewOutcome(result.verdict),review:q.data?.review??createReviewPlan(),last_practiced_at:new Date().toISOString()});qc.invalidateQueries({queryKey:["problems"]});}} b={q.data.breakdown} codeAttempt={q.data.code_attempt} onCodeSave={(attempt) => updateProblem(id, { code_attempt: attempt })} onIntuition={(s) => updateProblem(id, { intuition: s })} />
         </div>
       )}
-    </main>
+    </main></>
   );
 }

@@ -1,4 +1,9 @@
 # Current fixes
+- [ ] Distinguish wrong/right picks; restore opt-in walkthrough explanations.
+- [ ] Separate bug practice from answers, simplify puzzles, and hide review hints until requested.
+- [ ] Remove preset spoilers and prepare all sixteen breakdowns and narration.
+- [ ] Highlight log outcomes and restore saved-page navigation.
+- [ ] Verify the updated guest practice flow and rule tests.
 - [x] Correct guesses immediately with reasons; highlight chosen answers and keep rewards clear of navigation.
 - [x] Carry solved reviews into saved status and defer new reviews until due.
 - [x] Merge logging into one outcome choice; repair race bars and remove early algorithm spoilers.
