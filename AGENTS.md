@@ -36,7 +36,7 @@ use the editor.
 - Waiting-screen questions and answer explanations stay local with the tips; interactions must not add AI requests or delay the result.
 - Waiting questions are an ongoing local procedural stream: shuffle concept families without replacement per cycle, vary each cycle's examples, and persist the cycle and remaining families on device; never stop at a finite bank or add AI latency.
 - Render the six breakdown sections as shared preview flashcards opening scrollable detail dialogs, so workspace and saved problems remain consistent.
-- Present Understand, Guess, Walkthrough, Code, Reveal and Log in shared ordered tabs; persist session state locally and unlock answer cards only on code submission or confirmed early reveal; give immediate one-line guess feedback while keeping implementation details hidden.
+- Present Understand, Guess, Walkthrough, Code, a separate debugging challenge, Reveal and Log in shared ordered tabs; persist sessions locally and gate answer cards on code submission or confirmed early reveal so challenges precede solutions.
 - Keep workspace onboarding device-local and separate input/waiting from the review state; guide dismissal must not require an account or send extra requests.
 - Prepare story narration automatically when a breakdown is available, cache it in player memory, and preload audio before enabling narrated playback; append a solution epilogue from the breakdown so stories connect to the algorithm, data structure, and complexity without extra text-generation calls.
 - Code submissions receive static AI correctness and complexity analysis, never execution or fabricated timing; drafts and feedback are stored with device-local saved problems.
@@ -48,4 +48,5 @@ use the editor.
 
 - Keep rewards inline in the result header, never as floating overlays, so feedback cannot cover activity navigation.
 - Map AI correctness reviews to saved practice status and schedule new review plans no earlier than the following day; Today’s review excludes future scheduled and recently practiced rows.
-- Generate debugging challenges only on request and review edited code statically; never execute user submissions.
+- Open bundled preset debugging challenges on request; generate new/custom puzzles only on request and review edited code statically, never executing user submissions.
+- Use shared right/wrong guess states for pattern and complexity picks; reveal walkthrough explanations and unsuccessful review hints only on explicit request so learners can retry unaided.

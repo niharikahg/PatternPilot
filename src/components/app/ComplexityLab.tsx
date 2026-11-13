@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { FlaskConical, Lock } from "lucide-react";
+import { FlaskConical, Lock, Check, X } from "lucide-react";
+import { guessState } from "@/lib/guess-state";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
@@ -51,13 +52,14 @@ export function ComplexityLab({ lab, code, onAnswer, mode = "full", initialBet, 
       <p className="mt-4 text-sm font-medium">1. Place your bet: how fast is the smart way?</p>
       <div className="mt-2 flex flex-wrap gap-2">
         {GROWTH.map((g) => (
-          <motion.button key={g} whileTap={{ scale: 0.92 }} disabled={locked} onClick={() => setBet(g)}
-            className={cn("rounded-md border px-3 py-2 font-mono text-sm transition-colors",
-              bet === g && "border-primary bg-primary-soft",
-              mode !== "guess" && locked && g === lab.optimized_time && "border-success bg-success/15",
-              mode !== "guess" && locked && bet === g && g !== lab.optimized_time && "border-destructive bg-destructive/10")}>
+          <Button variant="outline" key={g} aria-pressed={bet===g} disabled={locked} onClick={() => setBet(g)}
+            className={cn("rounded-md border px-3 py-2 font-mono text-sm transition-colors disabled:opacity-100",
+              !locked && bet === g && "border-primary bg-primary-soft ring-2 ring-primary",
+              locked && guessState(g,bet,lab.optimized_time)==='correct' && "border-success bg-success/15 text-success ring-2 ring-success",
+              locked && guessState(g,bet,lab.optimized_time)==='wrong' && "border-destructive bg-destructive/10 text-destructive ring-2 ring-destructive")}>
+            {locked&&g===lab.optimized_time&&<Check className="size-4" />}{locked&&bet===g&&g!==lab.optimized_time&&<X className="size-4" />}
             {GROWTH_LABEL[g]}
-          </motion.button>
+          </Button>
         ))}
         {!locked && <Button size="sm" disabled={!bet} onClick={lock}><Lock className="h-4 w-4" /> Lock it in</Button>}
       </div>

@@ -6,6 +6,7 @@ import type { Breakdown } from "@/lib/types";
 
 export function Visualizer({ viz, hideTechnique = false }: { viz: Breakdown["visualization"]; hideTechnique?: boolean }) {
   const [i, setI] = useState(0);
+  const [explained, setExplained] = useState<number[]>([]);
   if (viz.kind === "none" || !viz.frames.length) return null;
   const f = viz.frames[Math.min(i, viz.frames.length - 1)];
   if (!f) return null;
@@ -70,7 +71,7 @@ export function Visualizer({ viz, hideTechnique = false }: { viz: Breakdown["vis
           </div>
         )}
       </div>
-      {!hideTechnique && f.vars.length > 0 && (
+      {(!hideTechnique || explained.includes(i)) && f.vars.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
           {f.vars.map((v) => (
             <span key={v.name} className="rounded-md bg-muted px-2 py-1 font-mono text-xs">
@@ -79,7 +80,8 @@ export function Visualizer({ viz, hideTechnique = false }: { viz: Breakdown["vis
           ))}
         </div>
       )}
-      <p className="mt-3 text-sm text-muted-foreground">{hideTechnique ? 'Trace the highlighted input. What changes, and what would you remember?' : f.note}</p>
+      {hideTechnique && <Button variant="outline" size="sm" className="mt-3" aria-pressed={explained.includes(i)} onClick={() => setExplained(prev => prev.includes(i) ? prev.filter(step => step !== i) : [...prev, i])}>{explained.includes(i) ? 'Hide what changed' : 'Show what changed'}</Button>}
+      {(!hideTechnique || explained.includes(i)) && <p className="mt-3 text-sm text-muted-foreground">{f.note}</p>}
       <div className="mt-4 flex gap-2">
         <Button variant="outline" size="sm" disabled={i === 0} onClick={() => setI(i - 1)}>
           <ChevronLeft className="h-4 w-4" /> Previous

@@ -16,7 +16,23 @@ import a4 from '@/assets/practice/4.mp3.asset.json';
 import a5 from '@/assets/practice/5.mp3.asset.json';
 import a6 from '@/assets/practice/6.mp3.asset.json';
 import a7 from '@/assets/practice/7.mp3.asset.json';
-const data=[b0,b1,b2,b3,b4,b5,b6,b7] as Breakdown[];
-const audio=[a0,a1,a2,a3,a4,a5,a6,a7];
-export function builtinBreakdown(text:string):Breakdown|null {const i=LIBRARY.findIndex(p=>p.text.trim()===text.trim());return data[i]??null;}
-export function builtinAudio(title:string):string|undefined {const i=data.findIndex(b=>b.title===title);return audio[i]?.url;}
+import b8 from './practice-data/8.json';
+import b9 from './practice-data/9.json';
+import b10 from './practice-data/10.json';
+import b11 from './practice-data/11.json';
+import b12 from './practice-data/12.json';
+import b13 from './practice-data/13.json';
+import b14 from './practice-data/14.json';
+import b15 from './practice-data/15.json';
+import a8 from '@/assets/practice/8.mp3.asset.json';
+import a9 from '@/assets/practice/9.mp3.asset.json';
+import a10 from '@/assets/practice/10.mp3.asset.json';
+import a11 from '@/assets/practice/11.mp3.asset.json';
+import a12 from '@/assets/practice/12.mp3.asset.json';
+import a13 from '@/assets/practice/13.mp3.asset.json';
+import a14 from '@/assets/practice/14.mp3.asset.json';
+import a15 from '@/assets/practice/15.mp3.asset.json';
+const data=[b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,b11,b12,b13,b14,b15] as Breakdown[];
+const audio=[a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15];
+export function builtinBreakdown(text:string):Breakdown|null {const i=LIBRARY.findIndex(p=>p.text.trim()===text.trim());const b=data[i];const preset=LIBRARY[i];return b&&preset?{...b,title:preset.title}:null;}
+export function builtinAudio(title:string):string|undefined {const i=data.findIndex((b,index)=>b.title===title||LIBRARY[index]?.title===title);return audio[i]?.url;}
