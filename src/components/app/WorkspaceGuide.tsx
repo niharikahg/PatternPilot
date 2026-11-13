@@ -31,7 +31,7 @@ export function WorkspaceGuide({ onTryExample }: { onTryExample: () => void }) {
             {[
               { icon: BookOpen, title: "Pick a problem", text: "Choose one below, or paste your own question." },
               { icon: Sparkles, title: "Find your approach", text: "Press Show me the approach. Try a thinking question while you wait." },
-              { icon: ArrowRight, title: "Explore, then save", text: "Open any of the six cards. Save to log when you’re ready to revisit it." },
+              { icon: ArrowRight, title: "Try, then reveal", text: "Make your guesses, explore the story, and try your code. Reveal answers after your attempt, then save." },
             ].map(({ icon: Icon, title, text }, index) => (
               <li key={title} className="flex items-start gap-3">
                 <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-primary/30 font-mono text-sm">{index + 1}</span>

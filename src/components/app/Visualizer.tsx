@@ -7,7 +7,8 @@ import type { Breakdown } from "@/lib/types";
 export function Visualizer({ viz }: { viz: Breakdown["visualization"] }) {
   const [i, setI] = useState(0);
   if (viz.kind === "none" || !viz.frames.length) return null;
-  const f = viz.frames[Math.min(i, viz.frames.length - 1)]!;
+  const f = viz.frames[Math.min(i, viz.frames.length - 1)];
+  if (!f) return null;
   const isHi = (r: number, c: number) => f.highlight.some((h) => h.row === r && h.col === c);
   const ptrs = (r: number, c: number) => f.pointers.filter((p) => p.row === r && p.col === c).map((p) => p.name);
 

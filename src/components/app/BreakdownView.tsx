@@ -41,7 +41,7 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
   const [ready, setReady] = useState(false);
   const [burst, setBurst] = useState(false);
   const unlocked = session.submitted || session.early;
-  const playbackStory = useMemo(() => storyWithEnding(b), [b]);
+  const playbackStory = useMemo(() => audioUrl && !audioUrl.startsWith('blob:') ? b.story : storyWithEnding(b), [b,audioUrl]);
   useEffect(() => { try { const value = localStorage.getItem(`pp-flow-${sessionKey}`); if(value) setSession(JSON.parse(value)); } catch {} setReady(true); }, [sessionKey]);
   useEffect(() => { if(ready) try { localStorage.setItem(`pp-flow-${sessionKey}`, JSON.stringify(session)); } catch {} }, [session, ready, sessionKey]);
   useEffect(() => { if(!burst) return; const t=setTimeout(()=>setBurst(false),2000); return ()=>clearTimeout(t); }, [burst,session.attempts]);
