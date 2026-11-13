@@ -1,4 +1,11 @@
 # Tasks
+- [ ] Reorder results into Understand, Guess, Walkthrough, Code, Reveal, and Log; gate answers and move solution hotspots.
+- [ ] Replace waiting technique clues with neutral thinking prompts.
+- [ ] Pre-generate all eight built-in breakdowns and narration; cache custom problems and show early custom sections.
+- [ ] Correct operation suffixes, comparison bars, and fixed pattern taxonomy.
+- [ ] Add transient rewards, pre-reveal XP, resubmission badges, and reload-safe sessions.
+- [ ] Add daily streak, weakest-pattern daily review, and 1/3/7-day retry scheduling.
+- [ ] Verify the gated flow, caching, persistence, practice rewards, and review scheduling.
 - [x] Replace stacked result sections with ordered tabs and next/back navigation.
 - [x] Verify result navigation on desktop and phone.
 - [x] Prepare story audio before Play and add a narrated solution/data-structure ending.
