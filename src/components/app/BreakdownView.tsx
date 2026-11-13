@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { ArrowLeft, ArrowRight, ArrowUpRight, BookOpen, Check, X, Bug, Code2, Copy, Gauge, Layers, ListChecks, Workflow, Play, FlaskConical, Lock } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, BookOpen, Check, X, Bug, Code2, Copy, Gauge, Layers, ListChecks, Workflow, Play, FlaskConical, Lock, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +23,7 @@ import { storyWithEnding } from "@/lib/story-ending";
 import { award, earlyReveal, freshSession, recordPracticeDay, type PracticeSession } from "@/lib/practice";
 import type { Growth } from "@/lib/game";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { restartProblem } from "@/lib/problem-restart";
 
 type Lang = keyof Breakdown["solution"];
 const STEPS = ["Understand", "Examples", "Pattern", "Approach", "Solution", "Complexity"] as const;
@@ -40,10 +41,19 @@ function H({ children }: { children: ReactNode }) {
   return <h4 className="mt-5 mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground first:mt-0">{children}</h4>;
 }
 
-export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave, logControls, initialStep = "understand", sessionKey = b.title, audioUrl, onReviewed }: { b: Breakdown; actions?: ReactNode; onIntuition?: (score: number) => void; codeAttempt?: SavedProblem["code_attempt"]; onCodeSave?: (attempt: NonNullable<SavedProblem["code_attempt"]>) => void; logControls?: ReactNode; initialStep?: string; sessionKey?: string; audioUrl?: string | undefined; onReviewed?: (feedback: CodeFeedback) => void }) {
+export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave, logControls, initialStep = "understand", sessionKey = b.title, audioUrl, onReviewed, onRestart }: { b: Breakdown; actions?: ReactNode; onIntuition?: (score: number) => void; codeAttempt?: SavedProblem["code_attempt"]; onCodeSave?: (attempt: NonNullable<SavedProblem["code_attempt"]>) => void; logControls?: ReactNode; initialStep?: string; sessionKey?: string; audioUrl?: string | undefined; onReviewed?: (feedback: CodeFeedback) => void; onRestart?: () => void }) {
   const [session, setSession] = useState<PracticeSession>(() => freshSession(initialStep));
   const [ready, setReady] = useState(false);
   const [burst, setBurst] = useState(false);
+  const [restartCount, setRestartCount] = useState(0);
+  const [freshAttempt, setFreshAttempt] = useState<SavedProblem['code_attempt']>();
+  const restart = () => {
+    if (!window.confirm('Restart this problem? Your guesses, code drafts, bug attempt, and hints will be cleared. Saved log outcomes and other problems stay unchanged.')) return;
+    try { setSession(restartProblem(localStorage, sessionKey)); } catch { setSession(freshSession()); }
+    setFreshAttempt(undefined); setRestartCount(count => count + 1); setBurst(false); setOpened(null); setLang('python');
+    onRestart?.();
+    navigationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
   const unlocked = session.submitted || session.early;
   const playbackStory = useMemo(() => audioUrl && !audioUrl.startsWith('blob:') ? b.story : storyWithEnding(b), [b,audioUrl]);
   useEffect(() => { try { const value = localStorage.getItem(`pp-flow-${sessionKey}`); if(value) setSession(JSON.parse(value)); } catch {} setReady(true); }, [sessionKey]);
@@ -156,6 +166,7 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
         <Badge variant="secondary">{b.difficulty}</Badge>
         <Badge variant={burst ? "secondary" : "outline"} aria-live="polite">{burst ? "🔥 " : ""}{session.xp} XP · intuition {intuitionScore(session.correct,session.attempts)}% · {session.combo}×</Badge>
         <div className="ml-auto flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" onClick={restart}><RotateCcw className="size-4" /> Restart this problem</Button>
           <Button variant="outline" size="sm" disabled={!unlocked} onClick={copy}>
             {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />} Copy notes
           </Button>
@@ -163,7 +174,7 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
         </div>
       </div>
 
-      <Tabs value={session.step} onValueChange={switchView}>
+      <Tabs key={restartCount} value={session.step} onValueChange={switchView}>
         <div ref={navigationRef} className="sticky top-16 z-20 scroll-mt-16 border-y bg-background py-3">
           <TabsList aria-label="Problem activities" className="grid h-auto w-full grid-cols-4 gap-1 bg-transparent p-0 lg:grid-cols-7">
             {views.map(({ id, label, icon: Icon }, index) => <TabsTrigger key={id} value={id} disabled={index>1&&!guessed} className="flex min-h-12 flex-col gap-1 px-1 py-2 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground sm:flex-row sm:gap-2 sm:text-sm"><Icon className="size-4 shrink-0" /><span>{index + 1}. {label}</span></TabsTrigger>)}

@@ -74,7 +74,7 @@ export function Visualizer({ viz, hideTechnique = false, exampleInput = "" }: { 
           </div>
         )}
       </div>
-      {(!hideTechnique || explained.includes(i)) && f.vars.length > 0 && (
+      {explained.includes(i) && f.vars.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
           {f.vars.map((v) => (
             <span key={v.name} className="rounded-md bg-muted px-2 py-1 font-mono text-xs">
@@ -83,8 +83,8 @@ export function Visualizer({ viz, hideTechnique = false, exampleInput = "" }: { 
           ))}
         </div>
       )}
-      {hideTechnique && <Button variant="outline" size="sm" className="mt-3" aria-pressed={explained.includes(i)} onClick={() => setExplained(prev => prev.includes(i) ? prev.filter(step => step !== i) : [...prev, i])}>{explained.includes(i) ? 'Hide what changed' : 'Show what changed'}</Button>}
-      {(!hideTechnique || explained.includes(i)) && <p className="mt-3 text-sm text-muted-foreground">{f.note}</p>}
+      <Button variant="outline" size="sm" className="mt-3" aria-pressed={explained.includes(i)} onClick={() => setExplained(prev => prev.includes(i) ? prev.filter(step => step !== i) : [...prev, i])}>{explained.includes(i) ? 'Hide what changed' : 'Show what changed'}</Button>
+      {explained.includes(i) && <p className="mt-3 text-sm text-muted-foreground">{f.note}</p>}
       <div className="mt-4 flex gap-2">
         <Button variant="outline" size="sm" disabled={i === 0} onClick={() => setI(i - 1)}>
           <ChevronLeft className="h-4 w-4" /> Previous

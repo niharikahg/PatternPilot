@@ -5,6 +5,7 @@ import {createBugChallenge} from '@/lib/bug-practice.functions';
 import {CodePractice} from './CodePractice';
 import type {SavedProblem} from '@/lib/local-log';
 import {builtinBug} from '@/lib/builtin-bugs';
+import {bugFirstHint} from '@/lib/bug-hints';
 export function BugPractice({problem,title,sessionKey}:{problem:string;title:string;sessionKey:string}) {
  const [challenge,setChallenge]=useState<{code:string;failing_input:string;expected_output:string}|null>(null);
  const [attempt,setAttempt]=useState<SavedProblem['code_attempt']>();

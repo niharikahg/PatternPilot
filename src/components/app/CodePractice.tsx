@@ -9,7 +9,7 @@ import { reviewBadge } from "@/lib/practice";
 import { Badge } from "@/components/ui/badge";
 import { hintContent } from "@/lib/practice-hints";
 
-export function CodePractice({ problem, attempt, onSave, onSubmitted, onReviewed, heading = "Your turn to code", failingInput }: { problem: string; attempt?: SavedProblem["code_attempt"]; onSave: (attempt: NonNullable<SavedProblem["code_attempt"]>) => void; onSubmitted?: () => void; onReviewed?: (feedback: CodeFeedback) => void; heading?: string; failingInput?: string }) {
+export function CodePractice({ problem, attempt, onSave, onSubmitted, onReviewed, heading = "Your turn to code", failingInput, firstHint }: { problem: string; attempt?: SavedProblem["code_attempt"]; onSave: (attempt: NonNullable<SavedProblem["code_attempt"]>) => void; onSubmitted?: () => void; onReviewed?: (feedback: CodeFeedback) => void; heading?: string; failingInput?: string; firstHint?: string }) {
   const review = useServerFn(reviewCode);
   const [language, setLanguage] = useState<"python" | "java" | "javascript">(attempt?.language === "java" ? "java" : attempt?.language === "javascript" ? "javascript" : "python");
   const [code, setCode] = useState(attempt?.code ?? "");
