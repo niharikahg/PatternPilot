@@ -1,10 +1,10 @@
 # Tasks
-- [ ] Move Complexity Lab and visual walkthrough above the flashcards.
-- [ ] Add a code-writing option with speed/complexity feedback and improvement suggestions.
-- [ ] Track solvable/retry problems and device-local review reminders after 1 day, 7 days, and 1 month.
-- [ ] Verify code feedback and spaced-review tracking end to end.
-- [ ] Make Story Mode prominent and replace quiz interruptions with flowing story playback.
-- [ ] Add on-demand narration and verify audio, playback controls, and phone layout.
+- [x] Move Complexity Lab and visual walkthrough above the flashcards.
+- [x] Add a code-writing option with speed/complexity feedback and improvement suggestions.
+- [x] Track solvable/retry problems and device-local review reminders after 1 day, 7 days, and 1 month.
+- [x] Verify code feedback and spaced-review tracking end to end.
+- [x] Make Story Mode prominent and replace quiz interruptions with flowing story playback.
+- [x] Add on-demand narration and verify audio, playback controls, and phone layout.
 - [x] Add a first-visit guide, a Generate breakdown pointer, and clear input/waiting/review steps.
 - [x] Verify the guided first-use flow and mobile layout.
 - [x] Shuffle waiting questions without repeats and verify the rotation.
