@@ -13,6 +13,8 @@ import { ComplexityLab } from "./ComplexityLab";
 import { celebrate } from "@/lib/confetti";
 import { intuitionScore, nextCombo } from "@/lib/game";
 import { AnimatePresence, motion } from "framer-motion";
+import { CodePractice } from "./CodePractice";
+import type { SavedProblem } from "@/lib/local-log";
 
 type Lang = keyof Breakdown["solution"];
 const STEPS = ["Understand", "Examples", "Pattern", "Approach", "Solution", "Complexity"] as const;
@@ -30,7 +32,7 @@ function H({ children }: { children: ReactNode }) {
   return <h4 className="mt-5 mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground first:mt-0">{children}</h4>;
 }
 
-export function BreakdownView({ b, actions, onIntuition }: { b: Breakdown; actions?: ReactNode; onIntuition?: (score: number) => void }) {
+export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave }: { b: Breakdown; actions?: ReactNode; onIntuition?: (score: number) => void; codeAttempt?: SavedProblem["code_attempt"]; onCodeSave?: (attempt: NonNullable<SavedProblem["code_attempt"]>) => void }) {
   const [combo, setCombo] = useState(0);
   const [tally, setTally] = useState({ correct: 0, attempts: 0 });
   const answer = (correct: boolean) => {
@@ -142,6 +144,10 @@ export function BreakdownView({ b, actions, onIntuition }: { b: Breakdown; actio
 
       {b.story && b.story.scenes.length > 0 && <StoryMode story={b.story} onAnswer={answer} />}
 
+      {b.complexity_lab && <ComplexityLab lab={b.complexity_lab} code={b.solution.python} onAnswer={answer} />}
+      <Visualizer viz={b.visualization} />
+      <CodePractice problem={`${b.title}\n${b.understand.restatement}\nInput: ${b.understand.inputs}\nOutput: ${b.understand.outputs}\nConstraints: ${b.understand.constraints.join("; ")}`} attempt={codeAttempt} onSave={onCodeSave ?? (() => {})} />
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {STEPS.map((label, i) => {
           const Icon = ICONS[i] ?? BookOpen;
@@ -164,8 +170,6 @@ export function BreakdownView({ b, actions, onIntuition }: { b: Breakdown; actio
         </DialogContent>
       </Dialog>
 
-      {b.complexity_lab && <ComplexityLab lab={b.complexity_lab} code={b.solution.python} onAnswer={answer} />}
-      <Visualizer viz={b.visualization} />
       <AnimatePresence>
         {combo > 0 && (
           <motion.div key={combo} initial={{ scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ opacity: 0 }}

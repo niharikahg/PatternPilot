@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { listProblems } from "@/lib/local-log";
 import { patternBreakdown, weakestPatterns } from "@/lib/stats";
+import { isReviewDue, nextReview } from "@/lib/review";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -31,6 +32,7 @@ function Dashboard() {
   const weak = weakestPatterns(rows);
   const avg = rows.length ? rows.reduce((s, r) => s + r.confidence, 0) / rows.length : 0;
   const max = Math.max(1, ...byPattern.map((p) => p.count));
+  const reviews = rows.filter((row) => nextReview(row.review)).sort((a, b) => String(nextReview(a.review)).localeCompare(String(nextReview(b.review))));
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
@@ -50,8 +52,13 @@ function Dashboard() {
         </div>
       ) : (
         <>
+          <section className="mt-6 border-y py-5" aria-label="Review reminders">
+            <h2 className="font-display text-xl font-bold">Your review reminders</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{rows.filter((row) => row.practice_status === "solved").length} solvable · {rows.filter((row) => row.practice_status === "retry").length} to practice again · Reminders appear here on this device.</p>
+            {reviews.length === 0 ? <p className="mt-3 text-sm text-muted-foreground">No reviews scheduled.</p> : <ul className="mt-3 divide-y">{reviews.map((row) => <li key={row.id}><Link to="/problems/$id" params={{ id: row.id }} className="flex flex-wrap items-center gap-3 py-3"><span className="font-medium">{row.title}</span><Badge variant={isReviewDue(row.review) ? "default" : "outline"}>{isReviewDue(row.review) ? "Review due" : `Review ${new Date(nextReview(row.review) ?? "").toLocaleDateString()}`}</Badge><ArrowRight className="ml-auto size-4" /></Link></li>)}</ul>}
+          </section>
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
-            <Stat label="Problems solved" value={String(rows.length)} />
+            <Stat label="Problems logged" value={String(rows.length)} />
             <Stat label="Patterns practiced" value={String(byPattern.length)} />
             <Stat label="Avg. confidence" value={`${avg.toFixed(1)} / 5`} />
           </div>
@@ -95,6 +102,7 @@ function Dashboard() {
                     <span className="font-medium">{r.title}</span>
                     <Badge variant="outline">{r.pattern}</Badge>
                     <Badge variant="secondary">{r.difficulty}</Badge>
+                    <Badge variant="outline">{r.practice_status === "solved" ? "Solvable" : r.practice_status === "retry" ? "Practice again" : "Not tried yet"}</Badge>
                     <span className="ml-auto font-mono text-xs text-muted-foreground">{r.intuition !== undefined && <>intuition {r.intuition}% · </>}confidence {r.confidence}/5</span>
                     <ArrowRight className="h-4 w-4 text-muted-foreground" />
                   </Link>

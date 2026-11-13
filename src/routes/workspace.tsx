@@ -12,7 +12,9 @@ import { ConfidencePicker } from "@/components/app/ConfidencePicker";
 import { generateBreakdown } from "@/lib/breakdown.functions";
 import { LIBRARY } from "@/lib/library";
 import { DIFFICULTIES, type Breakdown } from "@/lib/types";
-import { addProblem } from "@/lib/local-log";
+import { addProblem, type SavedProblem } from "@/lib/local-log";
+import { ReviewTracker } from "@/components/app/ReviewTracker";
+import type { PracticeStatus, ReviewPlan } from "@/lib/review";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Ambient } from "@/components/fx/Ambient";
@@ -44,6 +46,9 @@ function Workspace() {
   const [difficulty, setDifficulty] = useState<string>("Medium");
   const [intuition, setIntuition] = useState<number | undefined>();
   const [reviewing, setReviewing] = useState(false);
+  const [practiceStatus, setPracticeStatus] = useState<PracticeStatus>("untried");
+  const [reviewPlan, setReviewPlan] = useState<ReviewPlan | undefined>();
+  const [codeAttempt, setCodeAttempt] = useState<SavedProblem["code_attempt"]>();
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
   const stage = reviewing ? 2 : 0;
@@ -59,6 +64,7 @@ function Workspace() {
     mutationFn: (problem: string) => gen({ data: { problem } }),
     onSuccess: (r) => {
       setB(r);
+      setPracticeStatus("untried"); setReviewPlan(undefined); setCodeAttempt(undefined);
       setReviewing(true);
       setIntuition(undefined);
       setDifficulty(LIBRARY.find((l) => l.title === picked)?.difficulty ?? r.difficulty);
@@ -70,7 +76,7 @@ function Workspace() {
   const save = useMutation({
     mutationFn: async () => {
       if (!b) return;
-      return addProblem({ title: b.title, problem_text: text, pattern: b.pattern.name, difficulty, confidence, intuition, breakdown: b });
+      return addProblem({ title: b.title, problem_text: text, pattern: b.pattern.name, difficulty, confidence, intuition, breakdown: b, practice_status: practiceStatus, review: reviewPlan, ...(codeAttempt ? { code_attempt: codeAttempt } : {}) });
     },
     onSuccess: (id) => {
       qc.invalidateQueries({ queryKey: ["problems"] });
@@ -161,7 +167,8 @@ function Workspace() {
               <Save className="h-4 w-4" /> Save to log
             </Button>
           </div>
-          <BreakdownView key={b.title + text} b={b} onIntuition={setIntuition} />
+          <ReviewTracker status={practiceStatus} review={reviewPlan} onChange={(status, plan) => { setPracticeStatus(status); setReviewPlan(plan); }} />
+          <BreakdownView key={b.title + text} b={b} onIntuition={setIntuition} codeAttempt={codeAttempt} onCodeSave={setCodeAttempt} />
         </motion.div>
       )}
     </main>

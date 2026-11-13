@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { BreakdownView } from "@/components/app/BreakdownView";
 import { ConfidencePicker } from "@/components/app/ConfidencePicker";
 import { deleteProblem, getProblem, updateProblem } from "@/lib/local-log";
+import { ReviewTracker } from "@/components/app/ReviewTracker";
 
 export const Route = createFileRoute("/problems/$id")({
   head: () => ({
@@ -62,7 +63,8 @@ function ProblemPage() {
               <Trash2 className="h-4 w-4" /> Delete
             </Button>
           </div>
-          <BreakdownView b={q.data.breakdown} onIntuition={(s) => updateProblem(id, { intuition: s })} />
+          <ReviewTracker status={q.data.practice_status} review={q.data.review} onChange={(status, review) => { updateProblem(id, { practice_status: status, review }); qc.invalidateQueries({ queryKey: ["problems"] }); }} />
+          <BreakdownView b={q.data.breakdown} codeAttempt={q.data.code_attempt} onCodeSave={(attempt) => updateProblem(id, { code_attempt: attempt })} onIntuition={(s) => updateProblem(id, { intuition: s })} />
         </div>
       )}
     </main>
