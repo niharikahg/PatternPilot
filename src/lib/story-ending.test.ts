@@ -3,7 +3,7 @@ import { storyWithEnding } from './story-ending';
 import type { Breakdown } from './types';
 const b: Breakdown = {
  title:'Two Sum', difficulty:'Easy', understand:{restatement:'Find a pair',inputs:'numbers',outputs:'indices',constraints:[],clarifying_questions:[]}, examples:[],
- pattern:{name:'Hash Map',why:'The notebook represents a hash map storing values and indices.',recognize:'Look for a complement.'},
+ pattern:{name:'Arrays & Hashing',why:'The notebook represents a hash map storing values and indices.',recognize:'Look for a complement.'},
  approach:{brute_force:'',brute_force_pseudocode:'',optimized:'Use a hash map to store each value and index, and look up target minus current.',optimized_pseudocode:''},
  solution:{python:'',java:'',javascript:''},complexity:{time:'O(n)',space:'O(n)',explanation:'',follow_ups:[]},visualization:{kind:'none',frames:[]},
  story:{title:'Coin quest',scenes:[{caption:'The coins unlock the gate.',actors:[],question:null}]}

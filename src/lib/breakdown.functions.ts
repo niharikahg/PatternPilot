@@ -12,7 +12,7 @@ const obj = (properties: Record<string, unknown>) => ({
 });
 const cell = obj({ row: { type: "integer" }, col: { type: "integer" } });
 
-const schema = obj({
+export const breakdownSchema = obj({
   title: str,
   difficulty: { type: "string", enum: ["Easy", "Medium", "Hard"] },
   understand: obj({
@@ -71,12 +71,13 @@ const schema = obj({
   }),
 });
 
-const SYSTEM = `You are a senior software engineering interviewer coaching a career switcher or new grad.
+export const BREAKDOWN_SYSTEM = `You are a senior software engineering interviewer coaching a career switcher or new grad.
 Break the given coding interview problem into a structured 6-step framework. Be precise, plain-English, and concise.
 Rules:
 - understand: restate clearly; exactly 2 clarifying questions to ask the interviewer.
 - examples: 2-3 test cases including at least one edge case.
 - pattern.name must be one of: ${PATTERNS.join(", ")}.
+- Choose the single best category with a one-sentence justification in pattern.why. Integer reversal belongs to Math & Bit Manipulation; atoi/string-to-integer belongs to String Parsing, never Stack or Greedy. Linked-list reversal belongs to Linked List; grid traversal belongs to Graphs.
 - approach: describe brute force first, then the optimized approach, each with clear pseudocode.
 - solution: clean, idiomatic, commented code for the optimized approach in Python, Java and JavaScript.
 - complexity: Big-O with a plain-English explanation, plus 3 common interviewer follow-up questions.
@@ -106,10 +107,10 @@ export const generateBreakdown = createServerFn({ method: "POST" })
     try {
       const res = await generateResponse({
         model: "openai/gpt-6-astra",
-        instructions: SYSTEM,
+        instructions: BREAKDOWN_SYSTEM,
         reasoning: { effort: "low" },
         input: [{ role: "user", content: `Problem:\n${data.problem}\n\nReturn JSON.` }],
-        text: { format: { type: "json_schema", name: "breakdown", strict: true, schema } },
+        text: { format: { type: "json_schema", name: "breakdown", strict: true, schema: breakdownSchema } },
       });
       const output = ((res as unknown as { output?: OutputItem[] }).output ?? []);
       const text = output

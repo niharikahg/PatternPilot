@@ -25,7 +25,7 @@ function Lane({ label, g, n, max }: { label: string; g: Growth; n: number; max: 
   );
 }
 
-export function ComplexityLab({ lab, code, onAnswer, mode = "full", initialBet, onBet }: { lab: Lab; code: string; onAnswer: (correct: boolean) => void; mode?: "guess" | "reveal" | "full"; initialBet?: Growth; onBet?: (bet: Growth) => void }) {
+export function ComplexityLab({ lab, code, onAnswer, mode = "full", initialBet, onBet }: { lab: Lab; code: string; onAnswer: (correct: boolean) => void; mode?: "guess" | "reveal" | "full"; initialBet?: Growth | undefined; onBet?: (bet: Growth) => void }) {
   const [bet, setBet] = useState<Growth | null>(initialBet ?? null);
   const [locked, setLocked] = useState(Boolean(initialBet));
   const [idx, setIdx] = useState(2);
