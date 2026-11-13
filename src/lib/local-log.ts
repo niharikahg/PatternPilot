@@ -1,4 +1,5 @@
 import type { Breakdown } from "./types";
+import type { PracticeStatus, ReviewPlan } from "./review";
 
 export type SavedProblem = {
   id: string;
@@ -10,6 +11,9 @@ export type SavedProblem = {
   intuition?: number | undefined;
   breakdown: Breakdown;
   created_at: string;
+  practice_status?: PracticeStatus;
+  review?: ReviewPlan | undefined;
+  code_attempt?: { language: string; code: string; feedback?: string | undefined };
 };
 
 const KEY = "pp-problem-log";
