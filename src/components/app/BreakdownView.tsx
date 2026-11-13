@@ -178,7 +178,7 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
       <Tabs key={restartCount} value={session.step} onValueChange={switchView}>
         <div ref={navigationRef} className="sticky top-16 z-20 scroll-mt-16 border-y bg-background py-3">
           <TabsList aria-label="Problem activities" className="grid h-auto w-full grid-cols-4 gap-1 bg-transparent p-0 lg:grid-cols-7">
-            {views.map(({ id, label, icon: Icon }, index) => <TabsTrigger key={id} value={id} disabled={!canOpenPracticeStep(id,session,Boolean(b.complexity_lab))} className="flex min-h-12 flex-col gap-1 px-1 py-2 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground sm:flex-row sm:gap-2 sm:text-sm"><Icon className="size-4 shrink-0" /><span>{index + 1}. {label}</span></TabsTrigger>)}
+            {views.map(({ id, label, icon: Icon }, index) => <TabsTrigger key={id} value={id} disabled={!canOpenPracticeStep(id,session,Boolean(b.complexity_lab))} className="flex min-h-12 min-w-0 flex-col gap-1 whitespace-normal px-1 py-2 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground sm:flex-row sm:gap-2 sm:text-sm"><Icon className="size-4 shrink-0" /><span>{index + 1}. {label}</span></TabsTrigger>)}
           </TabsList>
         </div>
         <TabsContent value="understand" className="space-y-5 pt-4"><h3 className="font-display text-xl font-bold">Understand the problem</h3>{body[0]}<h3 className="font-display text-xl font-bold">Examples</h3>{body[1]}</TabsContent>
