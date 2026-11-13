@@ -37,6 +37,6 @@ use the editor.
 - Waiting questions are an ongoing local procedural stream: shuffle concept families without replacement per cycle, vary each cycle's examples, and persist the cycle and remaining families on device; never stop at a finite bank or add AI latency.
 - Render the six breakdown sections as shared preview flashcards opening scrollable detail dialogs, so workspace and saved problems remain consistent.
 - Keep workspace onboarding device-local and separate input/waiting from the review state; guide dismissal must not require an account or send extra requests.
-- Story narration is generated only when requested through a public server function and cached in player memory; continuous audio drives approximate word-weighted scene transitions, with optional questions after the film rather than blocking playback.
+- Prepare story narration automatically when a breakdown is available, cache it in player memory, and preload audio before enabling narrated playback; append a solution epilogue from the breakdown so stories connect to the algorithm, data structure, and complexity without extra text-generation calls.
 - Code submissions receive static AI correctness and complexity analysis, never execution or fabricated timing; drafts and feedback are stored with device-local saved problems.
 - Spaced reviews are device-local schedules anchored to the flag date at one day, seven days, and one calendar month; completion advances the queue without silently discarding overdue reviews.

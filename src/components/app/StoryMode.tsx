@@ -9,7 +9,7 @@ import type { Story } from "@/lib/types";
 import { narrateStory } from "@/lib/story-audio.functions";
 import { sceneAtProgress, storyTimeline } from "@/lib/story-playback";
 
-const CHAPTERS = ["Once upon a problem", "The mission", "A twist in the tale", "The clever discovery", "A happy ending"];
+const CHAPTERS = ["Once upon a problem", "The mission", "A twist in the tale", "The clever discovery", "A happy ending", "From story to solution"];
 
 export function StoryMode({ story, onAnswer }: { story: Story; onAnswer: (correct: boolean) => void }) {
   const narrate = useServerFn(narrateStory);
@@ -24,6 +24,7 @@ export function StoryMode({ story, onAnswer }: { story: Story; onAnswer: (correc
   const [finished, setFinished] = useState(false);
   const [picked, setPicked] = useState<Record<number, number>>({});
   const audioRef = useRef<HTMLAudioElement>(null);
+  const preparingRef = useRef(false);
   const openRef = useRef(false);
   const scene = story.scenes[i];
   const timeline = storyTimeline(story);
@@ -48,19 +49,24 @@ export function StoryMode({ story, onAnswer }: { story: Story; onAnswer: (correc
     return () => clearTimeout(timer);
   }, [open, playing, src, loading, scene, finished, i, story.scenes.length]);
 
-  const start = async () => {
-    openRef.current = true;
-    setOpen(true); setI(0); setFinished(false); setError("");
-    if (src) { if (audioRef.current) audioRef.current.currentTime = 0; setPlaying(true); return; }
+  const prepare = async () => {
+    if (preparingRef.current || src) return;
+    preparingRef.current = true;
     setLoading(true); setPlaying(false);
     try {
       const result = await narrate({ data: { captions: story.scenes.map((s) => s.caption) } });
       const bytes = Uint8Array.from(atob(result.base64), (char) => char.charCodeAt(0));
       setSrc(URL.createObjectURL(new Blob([bytes], { type: result.contentType })));
-      if (openRef.current) setPlaying(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Narration is unavailable. Watch with captions instead.");
     } finally { setLoading(false); }
+  };
+  useEffect(() => { void prepare(); }, []);
+  const start = () => {
+    openRef.current = true;
+    setOpen(true); setI(0); setFinished(false);
+    if (audioRef.current) audioRef.current.currentTime = 0;
+    setPlaying(true);
   };
   const jump = (next: number) => {
     setI(next); setFinished(false);
@@ -70,6 +76,10 @@ export function StoryMode({ story, onAnswer }: { story: Story; onAnswer: (correc
   if (!scene) return null;
 
   return <>
+    <audio ref={audioRef} src={src ?? undefined} preload="auto" muted={muted} onTimeUpdate={() => {
+      const audio = audioRef.current;
+      if (audio && audio.duration > 0) setI(sceneAtProgress(story, audio.currentTime / audio.duration));
+    }} onEnded={() => { setFinished(true); setPlaying(false); }} onError={() => { setPlaying(false); setError("The audio couldn’t play. You can watch with captions instead."); }} />
     <section className="flex flex-wrap items-center gap-5 border-y border-primary/25 bg-primary-soft px-5 py-6" aria-label="Story cinema">
       <div aria-hidden="true" className="flex items-center gap-1 text-4xl">
         <span>🎬</span><span className="text-3xl">{story.scenes[0]?.actors[0]?.emoji ?? "✨"}</span>
@@ -78,7 +88,10 @@ export function StoryMode({ story, onAnswer }: { story: Story; onAnswer: (correc
         <span className="text-xs font-semibold uppercase text-primary">Story cinema · Narrated</span>
         <h3 className="mt-1 font-display text-2xl font-bold">{story.title}</h3>
       </div>
-      <Button size="lg" onClick={() => void start()} className="h-12 gap-3 rounded-full px-6 shadow-pop"><Play className="size-5" /> Watch the story <Volume2 className="size-4" /></Button>
+      <div className="flex flex-col items-start gap-2">
+        <Button size="lg" disabled={loading || (!src && !error)} onClick={start} className="h-12 gap-3 rounded-full px-6 shadow-pop">{loading ? <Loader2 className="size-5 animate-spin" /> : <Play className="size-5" />}{loading || (!src && !error) ? "Preparing story audio…" : src ? "Watch the story" : "Watch with captions"}{src && <Volume2 className="size-4" />}</Button>
+        {error && <p className="max-w-xs text-xs text-muted-foreground">{error}</p>}
+      </div>
     </section>
     <Dialog open={open} onOpenChange={(value) => { openRef.current = value; setOpen(value); if (!value) setPlaying(false); }}>
       <DialogContent className="max-h-[92dvh] w-[calc(100%-1rem)] max-w-4xl gap-0 overflow-y-auto rounded-lg p-0">
@@ -86,10 +99,6 @@ export function StoryMode({ story, onAnswer }: { story: Story; onAnswer: (correc
           <DialogTitle className="font-display text-xl">{story.title}</DialogTitle>
           <DialogDescription className="mt-1">{CHAPTERS[i] ?? `Chapter ${i + 1}`} · {i + 1} / {story.scenes.length}</DialogDescription>
         </div>
-        <audio ref={audioRef} src={src ?? undefined} muted={muted} onTimeUpdate={() => {
-          const audio = audioRef.current;
-          if (audio && audio.duration > 0) setI(sceneAtProgress(story, audio.currentTime / audio.duration));
-        }} onEnded={() => { setFinished(true); setPlaying(false); }} onError={() => { setPlaying(false); setError("The audio couldn’t play. You can watch with captions instead."); }} />
         <div className="relative h-64 overflow-hidden border-b bg-primary-soft sm:h-96">
           <div className="absolute inset-x-0 bottom-0 h-12 border-t border-primary/20 bg-background/60" />
           <span className="absolute left-4 top-4 font-mono text-xs text-primary">CHAPTER {String(i + 1).padStart(2, "0")}</span>
@@ -100,7 +109,6 @@ export function StoryMode({ story, onAnswer }: { story: Story; onAnswer: (correc
             <motion.div animate={!reduced && playing && a.state === "active" ? { y: [0, -12, 0], rotate: [0, -5, 5, 0] } : { y: 0, rotate: 0 }} transition={{ repeat: Infinity, duration: 2 }} className="text-4xl sm:text-6xl">{a.emoji}</motion.div>
             <div className={cn("mt-2 break-words rounded-md border bg-card px-1 py-1 text-xs font-medium", a.state === "active" && "border-primary text-primary", a.state === "done" && "border-success text-success")}>{a.label}</div>
           </motion.div>)}
-          {loading && <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background/90"><Loader2 className="size-8 animate-spin text-primary" /><p className="font-medium">Warming up the narrator…</p></div>}
         </div>
         <div className="space-y-4 p-5">
           <p className="min-h-20 text-base leading-relaxed">{scene.caption}</p>

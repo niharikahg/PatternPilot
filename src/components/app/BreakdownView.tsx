@@ -15,6 +15,8 @@ import { intuitionScore, nextCombo } from "@/lib/game";
 import { AnimatePresence, motion } from "framer-motion";
 import { CodePractice } from "./CodePractice";
 import type { SavedProblem } from "@/lib/local-log";
+import { storyWithEnding } from "@/lib/story-ending";
+import { useMemo } from "react";
 
 type Lang = keyof Breakdown["solution"];
 const STEPS = ["Understand", "Examples", "Pattern", "Approach", "Solution", "Complexity"] as const;
@@ -34,6 +36,7 @@ function H({ children }: { children: ReactNode }) {
 
 export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave }: { b: Breakdown; actions?: ReactNode; onIntuition?: (score: number) => void; codeAttempt?: SavedProblem["code_attempt"]; onCodeSave?: (attempt: NonNullable<SavedProblem["code_attempt"]>) => void }) {
   const [combo, setCombo] = useState(0);
+  const playbackStory = useMemo(() => storyWithEnding(b), [b]);
   const [tally, setTally] = useState({ correct: 0, attempts: 0 });
   const answer = (correct: boolean) => {
     const c = nextCombo(combo, correct);
@@ -142,7 +145,7 @@ export function BreakdownView({ b, actions, onIntuition, codeAttempt, onCodeSave
         </div>
       </div>
 
-      {b.story && b.story.scenes.length > 0 && <StoryMode story={b.story} onAnswer={answer} />}
+      {playbackStory && <StoryMode story={playbackStory} onAnswer={answer} />}
 
       {b.complexity_lab && <ComplexityLab lab={b.complexity_lab} code={b.solution.python} onAnswer={answer} />}
       <Visualizer viz={b.visualization} />
