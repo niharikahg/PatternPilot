@@ -4,14 +4,14 @@ import { FlaskConical, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
-import { GROWTH, GROWTH_LABEL, formatOps, opsFor, type Growth } from "@/lib/game";
+import { GROWTH, GROWTH_LABEL, formatOps, opsFor, linearPercent, type Growth } from "@/lib/game";
 import type { ComplexityLab as Lab } from "@/lib/types";
 
 const SIZES = [10, 100, 1_000, 10_000, 100_000, 1_000_000];
 
 function Lane({ label, g, n, max }: { label: string; g: Growth; n: number; max: number }) {
   const ops = opsFor(g, n);
-  const pct = Math.max(2, Math.min(100, (Math.log10(ops + 1) / Math.log10(max + 1)) * 100));
+  const pct = linearPercent(ops, max);
   return (
     <div>
       <div className="mb-1 flex justify-between text-sm">
@@ -25,18 +25,18 @@ function Lane({ label, g, n, max }: { label: string; g: Growth; n: number; max: 
   );
 }
 
-export function ComplexityLab({ lab, code, onAnswer }: { lab: Lab; code: string; onAnswer: (correct: boolean) => void }) {
-  const [bet, setBet] = useState<Growth | null>(null);
-  const [locked, setLocked] = useState(false);
+export function ComplexityLab({ lab, code, onAnswer, mode = "full", initialBet, onBet }: { lab: Lab; code: string; onAnswer: (correct: boolean) => void; mode?: "guess" | "reveal" | "full"; initialBet?: Growth; onBet?: (bet: Growth) => void }) {
+  const [bet, setBet] = useState<Growth | null>(initialBet ?? null);
+  const [locked, setLocked] = useState(Boolean(initialBet));
   const [idx, setIdx] = useState(2);
   const [tapped, setTapped] = useState<number[]>([]);
   const [hotScored, setHotScored] = useState(false);
-  const n = SIZES[idx]!;
-  const max = Math.max(opsFor(lab.brute_force_time, 1_000_000), 10);
+  const n = SIZES[idx] ?? 1000;
+  const max = Math.max(opsFor(lab.brute_force_time, n), 1);
   const lines = code.split("\n");
   const hot = new Map(lab.code_hotspots.map((h) => [h.line, h]));
 
-  const lock = () => { if (!bet) return; setLocked(true); onAnswer(bet === lab.optimized_time); };
+  const lock = () => { if (!bet) return; setLocked(true); onBet?.(bet); onAnswer(bet === lab.optimized_time); };
   const tap = (l: number) => {
     if (tapped.includes(l)) return;
     setTapped([...tapped, l]);
@@ -47,21 +47,24 @@ export function ComplexityLab({ lab, code, onAnswer }: { lab: Lab; code: string;
     <section className="surface p-5">
       <div className="flex items-center gap-2"><FlaskConical className="h-4 w-4 text-primary" /><h3 className="text-sm font-medium">Complexity Lab</h3></div>
 
+      {mode !== "reveal" && <>
       <p className="mt-4 text-sm font-medium">1. Place your bet: how fast is the smart way?</p>
       <div className="mt-2 flex flex-wrap gap-2">
         {GROWTH.map((g) => (
           <motion.button key={g} whileTap={{ scale: 0.92 }} disabled={locked} onClick={() => setBet(g)}
             className={cn("rounded-md border px-3 py-2 font-mono text-sm transition-colors",
               bet === g && "border-primary bg-primary-soft",
-              locked && g === lab.optimized_time && "border-success bg-success/15",
-              locked && bet === g && g !== lab.optimized_time && "border-destructive bg-destructive/10")}>
+              mode !== "guess" && locked && g === lab.optimized_time && "border-success bg-success/15",
+              mode !== "guess" && locked && bet === g && g !== lab.optimized_time && "border-destructive bg-destructive/10")}>
             {GROWTH_LABEL[g]}
           </motion.button>
         ))}
         {!locked && <Button size="sm" disabled={!bet} onClick={lock}><Lock className="h-4 w-4" /> Lock it in</Button>}
       </div>
 
-      {locked && (
+      {locked && mode === "guess" && <p className="mt-3 text-sm">Bet recorded. Find out after your code attempt.</p>}
+      </>}
+      {(mode === "reveal" || (locked && mode === "full")) && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-6 space-y-4">
           <p className="text-sm font-medium">2. Race them. Drag n and watch the slow way explode.</p>
           <div className="flex items-center gap-4">
@@ -70,6 +73,7 @@ export function ComplexityLab({ lab, code, onAnswer }: { lab: Lab; code: string;
           </div>
           <Lane label="Slow way" g={lab.brute_force_time} n={n} max={max} />
           <Lane label="Smart way" g={lab.optimized_time} n={n} max={max} />
+          <p className="text-sm font-semibold">Slow way is {Math.round(max / Math.max(1, opsFor(lab.optimized_time, n))).toLocaleString()}× more work · Linear scale</p>
           <Lane label="Memory used" g={lab.optimized_space} n={n} max={max} />
 
           <p className="pt-2 text-sm font-medium">3. Spot the loop: tap the line that does most of the work.</p>
