@@ -12,7 +12,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { AppHeader, useAuthRefresh } from "@/components/app/AppHeader";
+import { AppHeader } from "@/components/app/AppHeader";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -139,7 +139,6 @@ function RootComponent() {
 }
 
 function AppShell() {
-  useAuthRefresh();
 
   return (
     <div className="min-h-screen">
