@@ -1,4 +1,7 @@
 # Current fixes
+- [x] Move Guess immediately before Reveal across workspace and saved review flows.
+- [x] Add an explained optimality score and progressive improvement prompts to static code reviews.
+- [x] Verify scoring, staged coaching, persistence, and the revised order.
 - [x] Keep walkthrough explanations opt-in after submission and reveal.
 - [x] Give debugging puzzles a conceptual first hint instead of repeating their input.
 - [x] Add scoped problem restart and verify fresh guesses, drafts, and locked answers.

@@ -117,7 +117,7 @@ function Workspace() {
       <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-4xl font-extrabold md:text-6xl">
         What are we <span className="inline-block -rotate-2 rounded-2xl bg-highlight px-3 text-highlight-foreground">cracking</span> today?
       </motion.h1>
-      <p className="mt-2 text-muted-foreground">{reviewing ? "Your breakdown is ready. Start with Understand, then try your guesses before revealing answers." : "Start with a practice problem below, or paste your own."}</p>
+      <p className="mt-2 text-muted-foreground">{reviewing ? "Your breakdown is ready. Start with Understand, try your code, then guess before revealing answers." : "Start with a practice problem below, or paste your own."}</p>
 
       <WorkspaceGuide onTryExample={() => { const example = LIBRARY.find((p) => p.title === "Two Sum"); if (example) pickProblem(example.title, example.text); }} />
       <ol aria-label="Problem progress" className="mt-5 grid grid-cols-3 border-b pb-4">
