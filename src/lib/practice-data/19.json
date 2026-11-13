@@ -15,7 +15,7 @@
     {
       "input": "nums = [3, 0, 1]",
       "output": "2",
-      "explanation": "The difference is 2, the missing value."
+      "explanation": "The final running value is 2, the only unmatched number."
     },
     {
       "input": "nums = []",
@@ -72,7 +72,7 @@
         "highlight": [],
         "pointers": [],
         "vars": [],
-        "note": "The allowed values are 0 through 3."
+        "note": "Start with n = 3 as the running XOR value."
       },
       {
         "cells": [
@@ -89,7 +89,7 @@
         ],
         "pointers": [],
         "vars": [],
-        "note": "The complete sum is 6; the array sum is 4."
+        "note": "XOR each index and its value: matching numbers cancel in pairs."
       },
       {
         "cells": [
@@ -106,7 +106,7 @@
         ],
         "pointers": [],
         "vars": [],
-        "note": "The difference is 2, the missing value."
+        "note": "The final running value is 2, the only unmatched number."
       }
     ]
   }

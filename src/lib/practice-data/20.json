@@ -47,18 +47,6 @@
       "Which boundary inputs would you check before submitting?"
     ]
   },
-  "complexity_lab": {
-    "brute_force_time": "n",
-    "optimized_time": "1",
-    "optimized_space": "1",
-    "code_hotspots": [
-      {
-        "line": 2,
-        "runs": "O(1) for the fixed 31-bit domain",
-        "why": "This loop performs the main input-dependent work."
-      }
-    ]
-  },
   "visualization": {
     "kind": "array",
     "frames": [

@@ -60,7 +60,7 @@
     ]
   },
   "visualization": {
-    "kind": "array",
+    "kind": "string",
     "frames": [
       {
         "cells": [
