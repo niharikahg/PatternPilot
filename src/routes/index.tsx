@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, BookOpen, Code2, Gauge, Layers, ListChecks, Workflow } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
+import { HeroScene } from "@/components/fx/HeroScene";
+import { Reveal } from "@/components/fx/Reveal";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -32,12 +35,13 @@ function Index() {
     <main className="overflow-hidden">
       <section className="relative">
         <div className="bg-hero pointer-events-none absolute inset-0" />
-        <div className="relative mx-auto max-w-6xl px-4 pt-20 pb-16 md:pt-28">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 pt-16 pb-16 md:pt-24 lg:grid-cols-[1.2fr_1fr]">
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 70 }}>
           <span className="inline-flex items-center gap-2 rounded-full border bg-card/70 px-3 py-1 text-xs font-medium backdrop-blur">
             <span className="h-2 w-2 rounded-full bg-highlight" /> For career switchers and new grads
           </span>
-          <h1 className="mt-6 max-w-5xl text-5xl font-extrabold leading-[0.95] md:text-8xl">
-            Learn the <span className="rounded-2xl bg-highlight px-3 text-highlight-foreground">pattern</span>,
+          <h1 className="mt-6 max-w-5xl text-5xl font-extrabold leading-[0.95] md:text-7xl">
+            Learn the <motion.span initial={{ rotate: -8, scale: 0.6 }} animate={{ rotate: -2, scale: 1 }} transition={{ type: "spring", delay: 0.4 }} className="inline-block rounded-2xl bg-highlight px-3 text-highlight-foreground">pattern</motion.span>,
             <br />not just the answer.
           </h1>
           <p className="mt-8 max-w-xl text-lg text-muted-foreground">
@@ -51,6 +55,8 @@ function Index() {
               <Link to="/dashboard">View dashboard</Link>
             </Button>
           </div>
+          </motion.div>
+          <HeroScene />
         </div>
       </section>
 
@@ -63,24 +69,24 @@ function Index() {
       </div>
 
       <section className="mx-auto max-w-6xl px-4 py-24">
-        <h2 className="max-w-2xl text-4xl font-bold md:text-5xl">Six steps. Every problem. Zero guesswork.</h2>
+        <Reveal><h2 className="max-w-2xl text-4xl font-bold md:text-5xl">Six steps. Every problem. Zero guesswork.</h2></Reveal>
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {STEPS.map((s, i) => (
-            <div key={s.t} className={"group rounded-3xl border p-7 transition-all hover:-translate-y-1 hover:shadow-pop " + (i === 0 ? "bg-highlight text-highlight-foreground" : i === 4 ? "bg-foreground text-background" : "bg-card")}>
+            <Reveal key={s.t} delay={i * 0.08}><div className={"group h-full rounded-3xl border p-7 transition-all hover:-translate-y-1 hover:shadow-pop " + (i === 0 ? "bg-highlight text-highlight-foreground" : i === 4 ? "bg-foreground text-background" : "bg-card")}>
               <div className="flex items-center justify-between">
-                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-background/90 text-foreground"><s.icon className="h-5 w-5" /></span>
+                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-background/90 text-foreground transition-transform duration-500 group-hover:rotate-[360deg] group-hover:scale-110"><s.icon className="h-5 w-5" /></span>
                 <span className="font-display text-4xl font-extrabold opacity-20">0{i + 1}</span>
               </div>
               <h3 className="mt-10 text-2xl font-bold">{s.t}</h3>
               <p className="mt-2 text-sm opacity-75">{s.d}</p>
-            </div>
+            </div></Reveal>
           ))}
         </div>
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pb-24">
         <div className="relative overflow-hidden rounded-[2rem] bg-foreground p-10 text-background md:p-16">
-          <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-highlight opacity-80 blur-3xl" />
+          <motion.div animate={{ scale: [1, 1.3, 1], x: [0, -40, 0] }} transition={{ duration: 8, repeat: Infinity }} className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-highlight opacity-80 blur-3xl" />
           <h2 className="relative max-w-2xl text-4xl font-bold md:text-6xl">Your next interview starts with one problem.</h2>
           <Button asChild size="lg" className="relative mt-8 h-12 rounded-full bg-highlight px-7 text-base text-highlight-foreground hover:bg-highlight/90">
             <Link to="/workspace">Open the workspace <ArrowRight className="h-4 w-4" /></Link>

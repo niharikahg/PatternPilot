@@ -14,6 +14,9 @@ import { LIBRARY } from "@/lib/library";
 import { DIFFICULTIES, type Breakdown } from "@/lib/types";
 import { addProblem } from "@/lib/local-log";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+import { Ambient } from "@/components/fx/Ambient";
+import { ThinkingScene } from "@/components/fx/ThinkingScene";
 
 export const Route = createFileRoute("/workspace")({
   head: () => ({
@@ -65,22 +68,27 @@ function Workspace() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
-      <h1 className="text-4xl font-extrabold md:text-5xl">Workspace</h1>
-      <p className="mt-1 text-sm text-muted-foreground">Paste a problem, or start from the library.</p>
+      <Ambient />
+      <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-4xl font-extrabold md:text-6xl">
+        What are we <span className="inline-block -rotate-2 rounded-2xl bg-highlight px-3 text-highlight-foreground">cracking</span> today?
+      </motion.h1>
+      <p className="mt-2 text-muted-foreground">Paste a problem, or pick one to warm up.</p>
 
       <div className="mt-6 flex flex-wrap gap-2">
-        {LIBRARY.map((p) => (
-          <button
+        {LIBRARY.map((p, i) => (
+          <motion.button
+            initial={{ opacity: 0, y: 12, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: 0.1 + i * 0.05, type: "spring" }} whileHover={{ y: -3, rotate: i % 2 ? 2 : -2 }} whileTap={{ scale: 0.92 }}
             key={p.title}
             onClick={() => { setPicked(p.title); setText(p.text); }}
-            className={cn("rounded-full border px-3 py-1 text-sm transition-colors hover:bg-accent", picked === p.title && "border-primary bg-primary-soft text-foreground")}
+            className={cn("rounded-full border bg-card px-4 py-1.5 text-sm font-medium transition-colors hover:bg-accent", picked === p.title && "border-transparent bg-foreground text-background hover:bg-foreground")}
           >
             {p.title}
-          </button>
+          </motion.button>
         ))}
       </div>
 
-      <div className="surface mt-4 p-4">
+      <motion.div layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="surface mt-5 p-5 transition-shadow focus-within:shadow-pop">
         <Textarea
           value={text}
           onChange={(e) => { setText(e.target.value); setPicked(null); }}
@@ -89,21 +97,17 @@ function Workspace() {
         />
         <div className="mt-3 flex items-center justify-between border-t pt-3">
           <span className="text-xs text-muted-foreground">{text.length} characters</span>
-          <Button onClick={() => run.mutate(text)} disabled={run.isPending || text.trim().length < 10}>
+          <Button className="rounded-full px-5 shadow-pop" onClick={() => run.mutate(text)} disabled={run.isPending || text.trim().length < 10}>
             {run.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
             {run.isPending ? "Breaking it down…" : "Generate breakdown"}
           </Button>
         </div>
-      </div>
+      </motion.div>
 
-      {run.isPending && (
-        <div className="mt-10 space-y-3">
-          {[0, 1, 2].map((i) => <div key={i} className="h-16 animate-pulse rounded-lg bg-muted" />)}
-        </div>
-      )}
+      {run.isPending && <ThinkingScene />}
 
       {b && !run.isPending && (
-        <div className="mt-10 space-y-6">
+        <motion.div initial={{ opacity: 0, y: 40, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 80 }} className="mt-10 space-y-6">
           <div className="surface flex flex-wrap items-center gap-4 p-4">
             <span className="text-sm font-medium">Log this problem</span>
             <Select value={difficulty} onValueChange={setDifficulty}>
@@ -118,7 +122,7 @@ function Workspace() {
             </Button>
           </div>
           <BreakdownView b={b} onIntuition={setIntuition} />
-        </div>
+        </motion.div>
       )}
     </main>
   );

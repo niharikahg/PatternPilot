@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Ambient } from "@/components/fx/Ambient";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,8 +34,9 @@ function Dashboard() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
+      <Ambient density={10} />
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+        <h1 className="text-4xl font-extrabold md:text-5xl">Your pattern map</h1>
         <Button asChild size="sm"><Link to="/workspace"><Plus className="h-4 w-4" /> New problem</Link></Button>
       </div>
 

@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Ambient } from "@/components/fx/Ambient";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -45,6 +46,7 @@ function ProblemPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
+      <Ambient density={10} />
       <Link to="/dashboard" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> Dashboard
       </Link>
