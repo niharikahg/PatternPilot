@@ -1,9 +1,11 @@
 import {describe,it,expect} from 'vitest';
 import {award,earlyReveal,freshSession,reviewBadge,dailyStreak,todaysReview} from './practice';
+import builtin from './practice-data/0.json';
+import type {Breakdown} from './types';
 import type {SavedProblem} from './local-log';
 describe('try before reveal',()=>{
  it('does not pick a just-solved problem for today',()=>{const row={id:'a',pattern:'Stack',confidence:1,created_at:'2026-11-13T08:00:00Z',last_practiced_at:'2026-11-13T08:00:00Z',practice_status:'solved'} as SavedProblem;expect(todaysReview([row],new Date('2026-11-13T08:10:00Z'))).toBeUndefined();});
- it('holds scheduled problems until the first due date',()=>{const row={id:'a',pattern:'Stack',confidence:1,created_at:'2020-01-01',review:{flagged_at:'2026-11-13T08:00:00Z',dates:['2026-11-14T08:00:00Z'],completed:[]}} as SavedProblem;expect(todaysReview([row],new Date('2026-11-13T08:10:00Z'))).toBeUndefined();expect(todaysReview([row],new Date('2026-11-14T08:00:00Z'))?.id).toBe('a');});
+ it('holds scheduled problems until the first due date',()=>{const row={id:'a',title:'Example',problem_text:'example',difficulty:'Easy',breakdown:builtin as Breakdown,pattern:'Stack',confidence:1,created_at:'2020-01-01',review:{flagged_at:'2026-11-13T08:00:00Z',dates:['2026-11-14T08:00:00Z'],completed:[]}} as SavedProblem;expect(todaysReview([row],new Date('2026-11-13T08:10:00Z'))).toBeUndefined();expect(todaysReview([row],new Date('2026-11-14T08:00:00Z'))?.id).toBe('a');});
  it('awards pattern XP only before reveal',()=>{expect(award(freshSession(),'pattern',true).xp).toBe(20);expect(award(earlyReveal(freshSession()),'pattern',true).xp).toBe(0);});
  it('awards complexity XP only before reveal',()=>{expect(award(freshSession(),'complexity',true).xp).toBe(20);expect(award({...freshSession(),submitted:true},'complexity',true).xp).toBe(0);});
  it('gives early reveal less successful code XP',()=>{expect(award({...freshSession(),submitted:true},'code',true).xp).toBe(50);expect(award(earlyReveal(freshSession()),'code',true).xp).toBe(10);});
