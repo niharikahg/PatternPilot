@@ -1,12 +1,13 @@
 import { expect, test } from 'vitest';
 import { PRACTICE_ORDER, canOpenPracticeStep } from './practice-order';
 import { freshSession } from './practice';
-test('Guess follows both coding activities immediately before Reveal',()=>{
- expect(PRACTICE_ORDER).toEqual(['understand','walkthrough','code','bug','guess','reveal','log']);
+test('Guess precedes walkthrough and coding to preserve prediction value',()=>{
+ expect(PRACTICE_ORDER).toEqual(['understand','guess','walkthrough','code','bug','reveal','log']);
 });
-test('learners can reach walkthrough and coding without guessing; Reveal waits for both guesses',()=>{
+test('walkthrough and coding wait for both guesses',()=>{
  const fresh=freshSession();
- for(const step of ['walkthrough','code','bug','guess']) expect(canOpenPracticeStep(step,fresh)).toBe(true);
+ for(const step of ['walkthrough','code','bug']) expect(canOpenPracticeStep(step,fresh)).toBe(false);
+ expect(canOpenPracticeStep('guess',fresh)).toBe(true);
  expect(canOpenPracticeStep('reveal',{...fresh,submitted:true})).toBe(false);
  expect(canOpenPracticeStep('reveal',{...fresh,patternGuess:'Arrays & Hashing',complexityGuess:'n'})).toBe(true);
  expect(canOpenPracticeStep('log',fresh)).toBe(false);

@@ -62,12 +62,13 @@ function ProblemPage() {
       {q.data && (
         <div className="mt-6 space-y-6">
           <BreakdownView onRestart={()=>{updateProblem(id,{code_attempt:{language:'python',code:''}});qc.invalidateQueries({queryKey:['problems']});}} initialStep="understand" sessionKey={practice?`${id}-review-${dayKey()}`:q.data.title} audioUrl={builtinAudio(q.data.title)} logControls={<>           <div className="surface flex flex-wrap items-center gap-3 p-4 text-sm">
-            <span className="text-muted-foreground">· {q.data.difficulty}</span>
+            <span className="text-muted-foreground">{q.data.title} · {q.data.difficulty}</span>
             <Button variant="ghost" size="sm" className="ml-auto text-destructive" onClick={() => confirm("Delete this problem?") && del.mutate()}>
               <Trash2 className="h-4 w-4" /> Delete
             </Button>
           </div>
-          <ReviewTracker status={q.data.practice_status} review={q.data.review} onChange={(status, review) => { updateProblem(id, { practice_status: status, confidence: status==='solved'?4:2, review }); qc.invalidateQueries({ queryKey: ["problems"] }); }} />
+          <div className="flex flex-wrap items-center gap-3 py-4"><span>Your confidence · 1 low, 5 high</span><ConfidencePicker value={q.data.confidence} onChange={value=>setConf.mutate(value)} /></div>
+          <ReviewTracker status={q.data.practice_status} review={q.data.review} onChange={(status, review) => { updateProblem(id, { practice_status: status, review }); qc.invalidateQueries({ queryKey: ["problems"] }); }} />
  </>} onReviewed={result=>{updateProblem(id,{practice_status:reviewOutcome(result.verdict),review:q.data?.review??createReviewPlan(),last_practiced_at:new Date().toISOString()});qc.invalidateQueries({queryKey:["problems"]});}} b={q.data.breakdown} codeAttempt={q.data.code_attempt} onCodeSave={(attempt) => updateProblem(id, { code_attempt: attempt })} onIntuition={(s) => updateProblem(id, { intuition: s })} />
         </div>
       )}
