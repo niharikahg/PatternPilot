@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { BreakdownView } from "@/components/app/BreakdownView";
 import { ConfidencePicker } from "@/components/app/ConfidencePicker";
 import { deleteProblem, getProblem, updateProblem } from "@/lib/local-log";
+import { createReviewPlan } from "@/lib/review";
+import { reviewOutcome } from "@/lib/guess-feedback";
 import { dayKey } from "@/lib/practice";
 import { builtinAudio } from "@/lib/builtins";
 import { ReviewTracker } from "@/components/app/ReviewTracker";
@@ -68,7 +70,7 @@ function ProblemPage() {
             </Button>
           </div>
           <ReviewTracker status={q.data.practice_status} review={q.data.review} onChange={(status, review) => { updateProblem(id, { practice_status: status, review }); qc.invalidateQueries({ queryKey: ["problems"] }); }} />
- </>} b={q.data.breakdown} codeAttempt={q.data.code_attempt} onCodeSave={(attempt) => updateProblem(id, { code_attempt: attempt })} onIntuition={(s) => updateProblem(id, { intuition: s })} />
+ </>} onReviewed={result=>{updateProblem(id,{practice_status:reviewOutcome(result.verdict),review:q.data?.review??createReviewPlan(),last_practiced_at:new Date().toISOString()});qc.invalidateQueries({queryKey:["problems"]});}} b={q.data.breakdown} codeAttempt={q.data.code_attempt} onCodeSave={(attempt) => updateProblem(id, { code_attempt: attempt })} onIntuition={(s) => updateProblem(id, { intuition: s })} />
         </div>
       )}
     </main>
