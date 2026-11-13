@@ -61,7 +61,7 @@ function ProblemPage() {
       {q.error && <p className="mt-6 text-sm text-destructive">Couldn't load this problem.</p>}
       {q.data && (
         <div className="mt-6 space-y-6">
-          <BreakdownView onRestart={()=>{updateProblem(id,{code_attempt:{language:'python',code:''}});qc.invalidateQueries({queryKey:['problems']});}} initialStep={practice?"guess":"understand"} sessionKey={practice?`${id}-review-${dayKey()}`:q.data.title} audioUrl={builtinAudio(q.data.title)} logControls={<>           <div className="surface flex flex-wrap items-center gap-3 p-4 text-sm">
+          <BreakdownView onRestart={()=>{updateProblem(id,{code_attempt:{language:'python',code:''}});qc.invalidateQueries({queryKey:['problems']});}} initialStep="understand" sessionKey={practice?`${id}-review-${dayKey()}`:q.data.title} audioUrl={builtinAudio(q.data.title)} logControls={<>           <div className="surface flex flex-wrap items-center gap-3 p-4 text-sm">
             <span className="text-muted-foreground">· {q.data.difficulty}</span>
             <Button variant="ghost" size="sm" className="ml-auto text-destructive" onClick={() => confirm("Delete this problem?") && del.mutate()}>
               <Trash2 className="h-4 w-4" /> Delete
