@@ -4,10 +4,9 @@
   "understand": {
     "restatement": "Given a list nums of nonnegative integers, choose elements with no two chosen positions adjacent. Return the largest possible sum. You may choose none, and empty lists return 0.",
     "inputs": "nums = [2, 7, 9, 3, 1]",
-    "outputs": "The result specified in the problem statement.",
+    "outputs": "The maximum sum of nonadjacent elements.",
     "constraints": [
-      "Given a list nums of nonnegative integers, choose elements with no two chosen positions adjacent. Return the largest possible sum. You may choose none, and empty lists return 0.",
-      "Use the input domain stated above; do not impose additional restrictions."
+      "Given a list nums of nonnegative integers, choose elements with no two chosen positions adjacent. Return the largest possible sum. You may choose none, and empty lists return 0."
     ],
     "clarifying_questions": []
   },

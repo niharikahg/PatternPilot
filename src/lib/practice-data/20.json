@@ -4,10 +4,9 @@
   "understand": {
     "restatement": "Given a nonnegative integer n smaller than 2^31, return the number of 1 bits in its binary representation.",
     "inputs": "n = 13",
-    "outputs": "The result specified in the problem statement.",
+    "outputs": "The number of set bits.",
     "constraints": [
-      "Given a nonnegative integer n smaller than 2^31, return the number of 1 bits in its binary representation.",
-      "For JavaScript integer bit operations, inputs stay within the stated signed 31-bit domain."
+      "Given a nonnegative integer n smaller than 2^31, return the number of 1 bits in its binary representation."
     ],
     "clarifying_questions": []
   },

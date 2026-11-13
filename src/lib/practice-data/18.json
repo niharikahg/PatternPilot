@@ -4,10 +4,9 @@
   "understand": {
     "restatement": "Given a lowercase English string s, return the index of the first character that appears exactly once, or -1 if none exists. Empty strings are allowed.",
     "inputs": "s = 'aabbc'",
-    "outputs": "The result specified in the problem statement.",
+    "outputs": "The first unique character index, or -1.",
     "constraints": [
-      "Given a lowercase English string s, return the index of the first character that appears exactly once, or -1 if none exists. Empty strings are allowed.",
-      "Use the input domain stated above; do not impose additional restrictions."
+      "Given a lowercase English string s, return the index of the first character that appears exactly once, or -1 if none exists. Empty strings are allowed."
     ],
     "clarifying_questions": []
   },

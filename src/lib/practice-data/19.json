@@ -4,10 +4,9 @@
   "understand": {
     "restatement": "Given nums containing n distinct integers drawn from 0 through n inclusive, return the one missing value. The array may be empty.",
     "inputs": "nums = [3, 0, 1]",
-    "outputs": "The result specified in the problem statement.",
+    "outputs": "The missing integer from 0 through n.",
     "constraints": [
-      "Given nums containing n distinct integers drawn from 0 through n inclusive, return the one missing value. The array may be empty.",
-      "Use the input domain stated above; do not impose additional restrictions."
+      "Given nums containing n distinct integers drawn from 0 through n inclusive, return the one missing value. The array may be empty."
     ],
     "clarifying_questions": []
   },

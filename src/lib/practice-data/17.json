@@ -4,10 +4,9 @@
   "understand": {
     "restatement": "Given an integer array nums, move every zero to the end in place while preserving the relative order of nonzero values. Return the modified array.",
     "inputs": "nums = [0, 3, 0, 2]",
-    "outputs": "The result specified in the problem statement.",
+    "outputs": "The input array with all zeros at the end.",
     "constraints": [
-      "Given an integer array nums, move every zero to the end in place while preserving the relative order of nonzero values. Return the modified array.",
-      "Use the input domain stated above; do not impose additional restrictions."
+      "Given an integer array nums, move every zero to the end in place while preserving the relative order of nonzero values. Return the modified array."
     ],
     "clarifying_questions": []
   },

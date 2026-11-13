@@ -4,10 +4,9 @@
   "understand": {
     "restatement": "Given an integer array nums, return true if any value appears more than once; otherwise return false. Empty arrays are allowed.",
     "inputs": "nums = [1, 2, 1]",
-    "outputs": "The result specified in the problem statement.",
+    "outputs": "A boolean indicating whether any value is repeated.",
     "constraints": [
-      "Given an integer array nums, return true if any value appears more than once; otherwise return false. Empty arrays are allowed.",
-      "Use the input domain stated above; do not impose additional restrictions."
+      "Given an integer array nums, return true if any value appears more than once; otherwise return false. Empty arrays are allowed."
     ],
     "clarifying_questions": []
   },

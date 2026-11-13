@@ -4,10 +4,9 @@
   "understand": {
     "restatement": "Given a nonempty array nums of nonnegative integers, start at index 0. Each value is the maximum number of positions you may jump forward from there. Return whether you can reach the final index.",
     "inputs": "nums = [2, 3, 1, 1, 4]",
-    "outputs": "The result specified in the problem statement.",
+    "outputs": "Whether the last index is reachable.",
     "constraints": [
-      "Given a nonempty array nums of nonnegative integers, start at index 0. Each value is the maximum number of positions you may jump forward from there. Return whether you can reach the final index.",
-      "Use the input domain stated above; do not impose additional restrictions."
+      "Given a nonempty array nums of nonnegative integers, start at index 0. Each value is the maximum number of positions you may jump forward from there. Return whether you can reach the final index."
     ],
     "clarifying_questions": []
   },

@@ -60,3 +60,4 @@ use the editor.
 - Derive blank language starters from solution signatures only; never expose solution bodies in the editor.
 - Show numerical optimality scores only for correct code; failed reviews use one correction/hint path to avoid contradictory feedback.
 - Require a deliberate confidence selection for new saved outcomes, save in place, and render Reveal complexity predictions as read-only recaps.
+- Bundle added problem statements, solutions, walkthroughs, and first debugging puzzles locally; keep existing narration pointers unchanged and omit story controls when no authored story exists.
