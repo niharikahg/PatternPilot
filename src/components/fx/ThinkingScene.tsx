@@ -33,11 +33,12 @@ export function ThinkingScene() {
   const [selected, setSelected] = useState<number | null>(null);
   const reducedMotion = useReducedMotion();
   const move = (direction: number) => {
+    if (selected === null) return;
     setI((x) => (x + direction + TIPS.length) % TIPS.length);
     setSelected(null);
   };
   useEffect(() => {
-    if (paused || reducedMotion || selected !== null) return;
+    if (paused || reducedMotion || selected === null) return;
     const id = setInterval(() => { setI((x) => (x + 1) % TIPS.length); setSelected(null); }, 20000);
     return () => clearInterval(id);
   }, [paused, reducedMotion, i, selected]);
@@ -83,9 +84,9 @@ export function ThinkingScene() {
       <div className="flex items-center justify-between gap-3 border-t pt-3">
         <span className="font-mono text-xs text-muted-foreground">{String(i + 1).padStart(2, "0")} / {String(TIPS.length).padStart(2, "0")}</span>
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" aria-label="Previous tip" title="Previous tip" onClick={() => move(-1)}><ArrowLeft className="h-4 w-4" /></Button>
+          <Button variant="ghost" size="icon" disabled={selected === null} aria-label="Previous tip" title="Previous tip" onClick={() => move(-1)}><ArrowLeft className="h-4 w-4" /></Button>
           {!reducedMotion && <Button variant="ghost" size="icon" aria-label={paused ? "Resume tips" : "Pause tips"} title={paused ? "Resume tips" : "Pause tips"} onClick={() => setPaused((p) => !p)}>{paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}</Button>}
-          <Button variant="ghost" size="icon" aria-label="Next tip" title="Next tip" onClick={() => move(1)}><ArrowRight className="h-4 w-4" /></Button>
+          <Button variant="ghost" size="icon" disabled={selected === null} aria-label="Next tip" title="Next tip" onClick={() => move(1)}><ArrowRight className="h-4 w-4" /></Button>
         </div>
       </div>
     </section>
