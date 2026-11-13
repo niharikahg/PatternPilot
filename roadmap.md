@@ -1,4 +1,8 @@
 # Current fixes
+- [ ] Fix constraint-aware bug reviews, visible review progress, and editor indentation.
+- [ ] Restore meaningful early guesses, continuous walkthrough explanations, and coherent complexity activities.
+- [ ] Correct optimal-score controls, completion navigation, confidence entry, labels, units, and short-window story controls.
+- [ ] Test the reported bracket fix and verify saved guest practice end to end.
 - [x] Move Guess immediately before Reveal across workspace and saved review flows.
 - [x] Add an explained optimality score and progressive improvement prompts to static code reviews.
 - [x] Verify scoring, staged coaching, persistence, and the revised order.

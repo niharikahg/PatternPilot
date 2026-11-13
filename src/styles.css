@@ -127,6 +127,7 @@
     -webkit-font-smoothing: antialiased;
   }
   pre, code { font-family: var(--font-mono); }
+  pre, code, textarea, .font-mono { font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
   h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.02em; }
 }
 

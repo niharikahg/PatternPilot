@@ -1,0 +1,4 @@
+export function reviewProblemContext(title: string, restatement: string, constraints: string[], input?: string, output?: string) {
+  return `${title}\n${restatement}\nStated constraints (authoritative):\n${constraints.map(c=>`- ${c}`).join('\n')}${input ? `\nDebugging example input: ${input}\nExpected output: ${output ?? ''}` : ''}`;
+}
+export const REVIEW_CONSTRAINT_RULE = 'Follow the stated input domain and constraints exactly. Do not invent requirements or penalize handling of inputs explicitly excluded by the problem. For a debugging example, statically trace the submitted code on that input and compare with the expected output. If the example is fixed and no correctness bug exists within the stated domain, verdict must be Looks correct with issues empty. Never claim you executed tests.';
