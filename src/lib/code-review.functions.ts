@@ -1,7 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { optimalitySchema } from './optimality';
 
-const feedbackSchema = z.object({ verdict: z.enum(["Looks correct", "Needs work", "Unclear"]), time: z.string(), space: z.string(), failing_input: z.string().optional(), explanation: z.string(), issues: z.array(z.string()), improvements: z.array(z.string()), improved_code: z.string() });
+const feedbackSchema = z.object({ verdict: z.enum(["Looks correct", "Needs work", "Unclear"]), time: z.string(), space: z.string(), failing_input: z.string().optional(), explanation: z.string(), issues: z.array(z.string()), improvements: z.array(z.string()), improved_code: z.string(), optimality: optimalitySchema.optional() });
 export type CodeFeedback = z.infer<typeof feedbackSchema>;
 export const reviewCode = createServerFn({ method: "POST" })
   .inputValidator((input) => z.object({ problem: z.string().min(1).max(12000), language: z.enum(["python", "java", "javascript"]), code: z.string().min(1).max(16000) }).parse(input))
