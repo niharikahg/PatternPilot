@@ -96,8 +96,8 @@ export function StoryMode({ story, onAnswer }: { story: Story; onAnswer: (correc
           {scene.actors.map((a) => <motion.div key={a.id} initial={false}
             animate={{ left: `${Math.min(85, Math.max(15, a.x))}%`, top: `${Math.min(75, Math.max(25, a.y))}%`, scale: a.state === "active" ? 1.15 : 1, opacity: a.state === "faded" ? 0.3 : 1 }}
             transition={{ duration: reduced ? 0 : 1.5, ease: "easeInOut" }}
-            className="absolute w-24 -translate-x-1/2 -translate-y-1/2 text-center">
-            <motion.div animate={!reduced && playing && a.state === "active" ? { y: [0, -12, 0], rotate: [0, -5, 5, 0] } : { y: 0, rotate: 0 }} transition={{ repeat: Infinity, duration: 2 }} className="text-5xl sm:text-6xl">{a.emoji}</motion.div>
+            className="absolute w-14 -translate-x-1/2 -translate-y-1/2 text-center sm:w-24">
+            <motion.div animate={!reduced && playing && a.state === "active" ? { y: [0, -12, 0], rotate: [0, -5, 5, 0] } : { y: 0, rotate: 0 }} transition={{ repeat: Infinity, duration: 2 }} className="text-4xl sm:text-6xl">{a.emoji}</motion.div>
             <div className={cn("mt-2 break-words rounded-md border bg-card px-1 py-1 text-xs font-medium", a.state === "active" && "border-primary text-primary", a.state === "done" && "border-success text-success")}>{a.label}</div>
           </motion.div>)}
           {loading && <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background/90"><Loader2 className="size-8 animate-spin text-primary" /><p className="font-medium">Warming up the narrator…</p></div>}

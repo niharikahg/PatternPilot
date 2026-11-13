@@ -168,6 +168,7 @@ function Workspace() {
             </Button>
           </div>
           <ReviewTracker status={practiceStatus} review={reviewPlan} onChange={(status, plan) => { setPracticeStatus(status); setReviewPlan(plan); }} />
+          {reviewPlan && <p className="text-sm text-muted-foreground">Save to log to keep these review reminders on this device.</p>}
           <BreakdownView key={b.title + text} b={b} onIntuition={setIntuition} codeAttempt={codeAttempt} onCodeSave={setCodeAttempt} />
         </motion.div>
       )}

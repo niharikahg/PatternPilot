@@ -10,7 +10,9 @@ export function CodePractice({ problem, attempt, onSave }: { problem: string; at
   const review = useServerFn(reviewCode);
   const [language, setLanguage] = useState<"python" | "java" | "javascript">(attempt?.language === "java" ? "java" : attempt?.language === "javascript" ? "javascript" : "python");
   const [code, setCode] = useState(attempt?.code ?? "");
-  const [feedback, setFeedback] = useState<CodeFeedback | null>(null);
+  const [feedback, setFeedback] = useState<CodeFeedback | null>(() => {
+    try { return attempt?.feedback ? JSON.parse(attempt.feedback) as CodeFeedback : null; } catch { return null; }
+  });
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const submit = async () => {
