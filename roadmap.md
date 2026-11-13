@@ -1,4 +1,6 @@
 # Tasks
+- [ ] Replace stacked result sections with ordered tabs and next/back navigation.
+- [ ] Verify result navigation on desktop and phone.
 - [ ] Prepare story audio before Play and add a narrated solution/data-structure ending.
 - [ ] Verify automatic preparation, immediate ready playback, and the story ending.
 - [x] Move Complexity Lab and visual walkthrough above the flashcards.
