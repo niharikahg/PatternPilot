@@ -104,7 +104,7 @@ function Workspace() {
     onSuccess: (id) => {
       qc.invalidateQueries({ queryKey: ["problems"] });
       toast.success("Saved to your problem log on this device");
-      if (id) navigate({ to: "/problems/$id", params: { id } });
+      if (id) navigate({ to: "/problems/$id", params: { id }, search:{practice:false} });
     },
     onError: (e: Error) => toast.error(e.message),
   });
