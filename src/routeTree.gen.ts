@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as WorkspaceRouteImport } from './routes/workspace'
 import { Route as ProblemsIdRouteImport } from './routes/problems.$id'
+import { Route as ApiPublicBreakdownRouteImport } from './routes/api/public/breakdown'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,18 +35,25 @@ const ProblemsIdRoute = ProblemsIdRouteImport.update({
   path: '/problems/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicBreakdownRoute = ApiPublicBreakdownRouteImport.update({
+  id: '/api/public/breakdown',
+  path: '/api/public/breakdown',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/workspace': typeof WorkspaceRoute
   '/problems/$id': typeof ProblemsIdRoute
+  '/api/public/breakdown': typeof ApiPublicBreakdownRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/workspace': typeof WorkspaceRoute
   '/problems/$id': typeof ProblemsIdRoute
+  '/api/public/breakdown': typeof ApiPublicBreakdownRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,30 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/workspace': typeof WorkspaceRoute
   '/problems/$id': typeof ProblemsIdRoute
+  '/api/public/breakdown': typeof ApiPublicBreakdownRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/workspace' | '/problems/$id'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/workspace'
+    | '/problems/$id'
+    | '/api/public/breakdown'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/workspace' | '/problems/$id'
-  id: '__root__' | '/' | '/dashboard' | '/workspace' | '/problems/$id'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/workspace'
+    | '/problems/$id'
+    | '/api/public/breakdown'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/workspace'
+    | '/problems/$id'
+    | '/api/public/breakdown'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +92,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   WorkspaceRoute: typeof WorkspaceRoute
   ProblemsIdRoute: typeof ProblemsIdRoute
+  ApiPublicBreakdownRoute: typeof ApiPublicBreakdownRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +125,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProblemsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/breakdown': {
+      id: '/api/public/breakdown'
+      path: '/api/public/breakdown'
+      fullPath: '/api/public/breakdown'
+      preLoaderRoute: typeof ApiPublicBreakdownRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +140,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   WorkspaceRoute: WorkspaceRoute,
   ProblemsIdRoute: ProblemsIdRoute,
+  ApiPublicBreakdownRoute: ApiPublicBreakdownRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
