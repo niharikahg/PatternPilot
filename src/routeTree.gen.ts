@@ -10,9 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as WorkspaceRouteImport } from './routes/workspace'
 import { Route as ProblemsIdRouteImport } from './routes/problems.$id'
 import { Route as ApiPublicBreakdownRouteImport } from './routes/api/public/breakdown'
@@ -22,19 +20,9 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WorkspaceRoute = WorkspaceRouteImport.update({
@@ -55,18 +43,14 @@ const ApiPublicBreakdownRoute = ApiPublicBreakdownRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
-  '/reset-password': typeof ResetPasswordRoute
   '/workspace': typeof WorkspaceRoute
   '/problems/$id': typeof ProblemsIdRoute
   '/api/public/breakdown': typeof ApiPublicBreakdownRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
-  '/reset-password': typeof ResetPasswordRoute
   '/workspace': typeof WorkspaceRoute
   '/problems/$id': typeof ProblemsIdRoute
   '/api/public/breakdown': typeof ApiPublicBreakdownRoute
@@ -74,9 +58,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
-  '/reset-password': typeof ResetPasswordRoute
   '/workspace': typeof WorkspaceRoute
   '/problems/$id': typeof ProblemsIdRoute
   '/api/public/breakdown': typeof ApiPublicBreakdownRoute
@@ -85,27 +67,21 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/auth'
     | '/dashboard'
-    | '/reset-password'
     | '/workspace'
     | '/problems/$id'
     | '/api/public/breakdown'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/auth'
     | '/dashboard'
-    | '/reset-password'
     | '/workspace'
     | '/problems/$id'
     | '/api/public/breakdown'
   id:
     | '__root__'
     | '/'
-    | '/auth'
     | '/dashboard'
-    | '/reset-password'
     | '/workspace'
     | '/problems/$id'
     | '/api/public/breakdown'
@@ -113,9 +89,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthRoute: typeof AuthRoute
   DashboardRoute: typeof DashboardRoute
-  ResetPasswordRoute: typeof ResetPasswordRoute
   WorkspaceRoute: typeof WorkspaceRoute
   ProblemsIdRoute: typeof ProblemsIdRoute
   ApiPublicBreakdownRoute: typeof ApiPublicBreakdownRoute
@@ -130,25 +104,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/workspace': {
@@ -177,9 +137,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthRoute: AuthRoute,
   DashboardRoute: DashboardRoute,
-  ResetPasswordRoute: ResetPasswordRoute,
   WorkspaceRoute: WorkspaceRoute,
   ProblemsIdRoute: ProblemsIdRoute,
   ApiPublicBreakdownRoute: ApiPublicBreakdownRoute,

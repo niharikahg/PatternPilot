@@ -12,7 +12,6 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { AccountProvider } from "@/components/app/AccountProvider";
 import { AppHeader } from "@/components/app/AppHeader";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -134,7 +133,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <AccountProvider><AppShell /></AccountProvider>
+      <AppShell />
     </QueryClientProvider>
   );
 }

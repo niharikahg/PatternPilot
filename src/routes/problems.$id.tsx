@@ -62,14 +62,12 @@ function ProblemPage() {
       {q.data && (
         <div className="mt-6 space-y-6">
           <BreakdownView initialStep={practice?"guess":"understand"} sessionKey={practice?`${id}-review-${dayKey()}`:q.data.title} audioUrl={builtinAudio(q.data.title)} logControls={<>           <div className="surface flex flex-wrap items-center gap-3 p-4 text-sm">
-            <span className="text-muted-foreground">Confidence</span>
-            <ConfidencePicker value={q.data.confidence} onChange={(n) => setConf.mutate(n)} />
             <span className="text-muted-foreground">· {q.data.difficulty}</span>
             <Button variant="ghost" size="sm" className="ml-auto text-destructive" onClick={() => confirm("Delete this problem?") && del.mutate()}>
               <Trash2 className="h-4 w-4" /> Delete
             </Button>
           </div>
-          <ReviewTracker status={q.data.practice_status} review={q.data.review} onChange={(status, review) => { updateProblem(id, { practice_status: status, review }); qc.invalidateQueries({ queryKey: ["problems"] }); }} />
+          <ReviewTracker status={q.data.practice_status} review={q.data.review} onChange={(status, review) => { updateProblem(id, { practice_status: status, confidence: status==='solved'?4:2, review }); qc.invalidateQueries({ queryKey: ["problems"] }); }} />
  </>} onReviewed={result=>{updateProblem(id,{practice_status:reviewOutcome(result.verdict),review:q.data?.review??createReviewPlan(),last_practiced_at:new Date().toISOString()});qc.invalidateQueries({queryKey:["problems"]});}} b={q.data.breakdown} codeAttempt={q.data.code_attempt} onCodeSave={(attempt) => updateProblem(id, { code_attempt: attempt })} onIntuition={(s) => updateProblem(id, { intuition: s })} />
         </div>
       )}
