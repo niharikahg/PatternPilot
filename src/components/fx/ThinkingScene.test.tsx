@@ -11,13 +11,15 @@ describe("Waiting question progression", () => {
     const next = screen.getByRole("button", { name: "Next tip" });
     const previous = screen.getByRole("button", { name: "Previous tip" });
     const options = screen.getAllByRole("button", { pressed: false });
+    const firstOption = options[0];
+    if (!firstOption) throw new Error("Expected an answer option");
     expect(next).toBeDisabled();
     expect(previous).toBeDisabled();
     act(() => { vi.advanceTimersByTime(60000); });
     expect(screen.getAllByRole("button", { pressed: false })[0]).toBe(options[0]);
     fireEvent.click(next);
     expect(next).toBeDisabled();
-    fireEvent.click(options[0]);
+    fireEvent.click(firstOption);
     expect(next).toBeEnabled();
     expect(previous).toBeEnabled();
     fireEvent.click(next);
